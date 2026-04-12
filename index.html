@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ugec Ticket - بوابة الموظف</title>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
@@ -84,8 +88,7 @@
         .modal-content{background:var(--modal-bg);border:1px solid var(--border);border-radius:20px;max-width:720px;width:100%;max-height:85vh;overflow-y:auto;transform:scale(.9) translateY(20px);transition:transform .3s,background .4s,border-color .4s}
         .modal-overlay.active .modal-content{transform:scale(1) translateY(0)}
         
-        .lightbox-overlay{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:9000;display:flex;align-items:center;justify-content:center;padding:40px;opacity:0;pointer-events:none;transition:opacity .3s;cursor:zoom-out}.lightbox-overlay.active{opacity:1;pointer-events:all}
-        .lightbox-overlay img{max-width:90%;max-height:85vh;border-radius:12px;object-fit:contain}
+        .lightbox-overlay{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:9000;display:flex;align-items:center;justify-content:center;padding:40px;opacity:0;pointer-events:none;transition:opacity .3s;cursor:zoom-out}.lightbox-overlay.active{opacity:1;pointer-events:all}.lightbox-overlay img{max-width:90%;max-height:85vh;border-radius:12px;object-fit:contain}
         .lightbox-close{position:absolute;top:20px;left:20px;width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:white;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}.lightbox-close:hover{background:rgba(255,77,106,.3);border-color:var(--danger)}
         
         /* فلتر التذاكر */
@@ -328,7 +331,40 @@
     </div>
 
     <script>
+    /* =========================================
+       FIREBASE CONFIGURATION (إعداداتك)
+       ========================================= */
+  const firebaseConfig = {
+  apiKey: "AIzaSyAlKEOvbVXdvRypso5rtwz8Fd2vjSAkxRs",
+  authDomain: "ugecticketsystem.firebaseapp.com",
+  databaseURL: "https://ugecticketsystem-default-rtdb.firebaseio.com", // (هذا السطر كان مفقوداً عندك، وهو ضروري جداً)
+  projectId: "ugecticketsystem",
+  storageBucket: "ugecticketsystem.firebasestorage.app",
+  messagingSenderId: "8172737962",
+  appId: "1:8172737962:web:aea493fa37f1c27f7587d3",
+  measurementId: "G-RZEM7YTQ0M"
+};
+
+    // تهيئة Firebase
+    let db;
+    try {
+        if (!firebaseConfig.databaseURL) {
+            console.error("Please configure firebaseConfig in the code!");
+            alert("خطأ: لم يتم إعداد إعدادات Firebase في الكود.");
+        } else {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.database();
+            console.log("Firebase initialized successfully");
+        }
+    } catch (e) {
+        console.error("Firebase Init Error:", e);
+    }
+
+    /* =========================================
+       APP STATE
+       ========================================= */
     var state={user:null};var tempFiles=[];var myTicketFilter='all';var notifPanelOpen=false,profileOpen=false;
+    var myTicketsCache = []; // تخزين مؤقت للتيكتات
 
     /* === الثيم === */
     function getTheme(){return localStorage.getItem('ugec_theme')||'dark'}
@@ -346,6 +382,14 @@
     function renderAv(el,name,cls){var c=avColor(name);el.className='avatar '+(cls||'avatar-sm');el.style.background=c;el.textContent=initials(name)}
 
     /* === إدارة الإشعارات === */
+    // الاستماع للإشعارات الخاصة بهذا المستخدم فقط
+    if(db && state.user) {
+        db.ref('notifications').orderByChild('ticketId').startAt('TKT-').endAt('TKT-\uf8ff').on('value', snap => {
+             // منطق بسيط لتحديث العداد (يمكن تحسينه بفلترة دقيقة في السيرفر)
+             // للتبسيط سنستخدم العداد من LocalStorage كما كان أو سنعتمد على السماعات
+        });
+    }
+
     function getN(){try{return JSON.parse(localStorage.getItem('ugec_notifs')||'[]')}catch(e){return[]}}
     function saveN(n){localStorage.setItem('ugec_notifs',JSON.stringify(n))}
     function addN(type,title,body,tid){var ns=getN();ns.unshift({id:Date.now(),type:type,title:title,body:body,ticketId:tid||null,time:getNow(),read:false});if(ns.length>50)ns.length=50;saveN(ns);updateNU();playNotifSound();var b=document.getElementById('bellIcon');if(b){b.classList.remove('bell-ring');void b.offsetWidth;b.classList.add('bell-ring')}}
@@ -355,18 +399,18 @@
     function delN(id){saveN(getN().filter(function(n){return n.id!==id}));updateNU();renderNP()}
     function updateNU(){var c=unreadC();var el=document.getElementById('notifCount');if(!el)return;if(c>0){el.textContent=c>99?'99+':c;el.classList.remove('hidden')}else{el.classList.add('hidden')}}
     var NI={create:{icon:'fa-plus-circle',bg:'rgba(0,232,143,.1)',color:'#00e88f'},status:{icon:'fa-arrows-rotate',bg:'rgba(56,189,248,.1)',color:'#38bdf8'},response:{icon:'fa-reply',bg:'rgba(171,71,188,.1)',color:'#ab47bc'},resolve:{icon:'fa-check-circle',bg:'rgba(0,232,143,.1)',color:'#00e88f'},cancel:{icon:'fa-ban',bg:'rgba(255,77,106,.1)',color:'#ff4d6a'}};
-    function renderNP(){var ns=getN();var p=document.getElementById('notifPanel');if(!p)return;var h='<div class="notif-panel-header"><span style="font-weight:700;font-size:14px;">الإشعارات</span><div style="display:flex;gap:8px;"><button onclick="event.stopPropagation();markAllR();renderNP()" style="background:none;border:none;color:var(--accent);font-size:11px;font-weight:600;cursor:pointer;font-family:Cairo;">قراءة الكل</button><span style="color:var(--border);">|</span><button onclick="event.stopPropagation();openNC()" style="background:none;border:none;color:var(--info);font-size:11px;font-weight:600;cursor:pointer;font-family:Cairo;">عرض الكل</button></div></div>';if(!ns.length){h+='<div style="padding:40px 20px;text-align:center;"><i class="fas fa-bell-slash" style="font-size:32px;color:var(--fg-m);opacity:.3;display:block;margin-bottom:12px;"></i><p style="font-size:13px;color:var(--fg-m);">لا توجد إشعارات</p></div>'}else{h+='<div style="max-height:360px;overflow-y:auto;">';ns.slice(0,8).forEach(function(n){var cfg=NI[n.type]||NI.create;var tid=n.ticketId?"'"+n.ticketId+"'":'null';h+='<div class="notif-item'+(n.read?'':' unread')+'" onclick="event.stopPropagation();handleNC('+n.id+','+tid+')"><div class="notif-icon-wrap" style="background:'+cfg.bg+';color:'+cfg.color+';"><i class="fas '+cfg.icon+'"></i></div><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+n.title+'</div><div style="font-size:11px;color:var(--fg-m);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+n.body+'</div><div style="font-size:10px;color:var(--fg-m);opacity:.6;margin-top:4px;">'+n.time+'</div></div><button onclick="event.stopPropagation();delN('+n.id+')" style="background:none;border:none;color:var(--fg-m);cursor:pointer;font-size:11px;opacity:.4;padding:4px;flex-shrink:0;"><i class="fas fa-times"></i></button></div>'});h+='</div>'}p.innerHTML=h}
+    function renderNP(){var ns=getN();var p=document.getElementById('notifPanel');if(!p)return;var h='<div class="notif-panel-header"><span style="font-weight:700;font-size:14px;">الإشعارات</span><div style="display:flex;gap:8px;"><button onclick="event.stopPropagation();markAllR();renderNP()" style="background:none;border:none;color:var(--accent);font-size:11px;font-weight:600;cursor:pointer;font-family:Cairo;">قراءة الكل</button><span style="color:var(--border);">|</span><button onclick="event.stopPropagation();openNC()" style="background:none;border:none;color:var(--info);font-size:11px;font-weight:600;cursor:pointer;font-family:Cairo;">عرض الكل</button></div></div>';if(!ns.length)h+='<div style="padding:40px 20px;text-align:center;"><i class="fas fa-bell-slash" style="font-size:32px;color:var(--fg-m);opacity:.3;display:block;margin-bottom:12px;"></i><p style="font-size:13px;color:var(--fg-m);">لا توجد إشعارات</p></div>';else{h+='<div style="max-height:360px;overflow-y:auto;">';ns.slice(0,8).forEach(function(n){var cfg=NI[n.type]||NI.create;var tid=n.ticketId?"'"+n.ticketId+"'":'null';h+='<div class="notif-item'+(n.read?'':' unread')+'" onclick="event.stopPropagation();handleNC('+n.id+','+tid+')"><div class="notif-icon-wrap" style="background:'+cfg.bg+';color:'+cfg.color+';"><i class="fas '+cfg.icon+'"></i></div><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+n.title+'</div><div style="font-size:11px;color:var(--fg-m);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+n.body+'</div><div style="font-size:10px;color:var(--fg-m);opacity:.6;margin-top:4px;">'+n.time+'</div></div><button onclick="event.stopPropagation();delN('+n.id+')" style="background:none;border:none;color:var(--fg-m);cursor:pointer;font-size:11px;opacity:.4;padding:4px;flex-shrink:0;"><i class="fas fa-times"></i></button></div>'});h+='</div>'}p.innerHTML=h}
     function handleNC(id,tid){markNR(id);closeDD();if(tid)openTD(tid)}
     function toggleNotifPanel(e){if(e)e.stopPropagation();notifPanelOpen=!notifPanelOpen;profileOpen=false;var p=document.getElementById('notifPanel'),d=document.getElementById('profileDropdown');if(p)p.classList.toggle('open',notifPanelOpen);if(d)d.classList.remove('open');if(notifPanelOpen)renderNP()}
     function toggleProfileDropdown(e){if(e)e.stopPropagation();profileOpen=!profileOpen;notifPanelOpen=false;var d=document.getElementById('profileDropdown'),p=document.getElementById('notifPanel');if(d)d.classList.toggle('open',profileOpen);if(p)p.classList.remove('open');if(profileOpen)renderPD()}
     function closeDD(){notifPanelOpen=false;profileOpen=false;var p=document.getElementById('notifPanel'),d=document.getElementById('profileDropdown');if(p)p.classList.remove('open');if(d)d.classList.remove('open')}
     document.addEventListener('click',function(e){var nw=document.getElementById('notifWrap'),pw=document.getElementById('profileWrap');if(nw&&!nw.contains(e.target)){notifPanelOpen=false;var p=document.getElementById('notifPanel');if(p)p.classList.remove('open')}if(pw&&!pw.contains(e.target)){profileOpen=false;var d=document.getElementById('profileDropdown');if(d)d.classList.remove('open')}});
 
-    function openNC(){closeDD();var ns=getN();var h='<div style="padding:28px;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;"><div style="display:flex;align-items:center;gap:12px;"><div style="width:4px;height:28px;background:var(--info);border-radius:2px;"></div><h2 style="font-size:20px;font-weight:800;">مركز الإشعارات</h2><span style="background:rgba(56,189,248,.1);color:var(--info);font-size:12px;font-weight:700;padding:2px 10px;border-radius:10px;">'+ns.length+'</span></div><div style="display:flex;gap:8px;"><button class="btn-secondary" style="font-size:12px;padding:6px 14px;" onclick="markAllR();openNC()"><i class="fas fa-check-double" style="margin-left:5px;"></i>قراءة الكل</button><button onclick="clearAllN()" style="background:rgba(255,77,106,.1);color:var(--danger);font-size:12px;font-weight:600;padding:6px 14px;border-radius:10px;border:1px solid rgba(255,77,106,.2);cursor:pointer;font-family:Cairo;"><i class="fas fa-trash" style="margin-left:5px;"></i>مسح الكل</button></div></div>';if(!ns.length)h+='<div class="empty-state"><i class="fas fa-bell-slash"></i><p style="font-weight:600;">لا توجد إشعارات</p></div>';else ns.forEach(function(n){var cfg=NI[n.type]||NI.create;var click=n.ticketId?'onclick="closeModal();setTimeout(function(){openTD(\''+n.ticketId+'\')},200)"':'';h+='<div class="notif-center-item'+(n.read?'':' unread')+'" style="cursor:'+(n.ticketId?'pointer':'default')+';padding:16px 24px;border-bottom:1px solid rgba(0,232,143,.04);display:flex;gap:14px;position:relative;transition:background .2s;" '+click+'><div class="nc-dot" style="display:none;position:absolute;right:12px;top:50%;transform:translateY(-50%);width:7px;height:7px;border-radius:50%;background:var(--accent);"></div><div class="notif-icon-wrap" style="background:'+cfg.bg+';color:'+cfg.color+';flex-shrink:0;width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;"><i class="fas '+cfg.icon+'"></i></div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;margin-bottom:3px;">'+n.title+'</div><div style="font-size:12px;color:var(--fg-m);margin-bottom:4px;">'+n.body+'</div><div style="font-size:11px;color:var(--fg-m);opacity:.5;">'+n.time+'</div></div><button onclick="event.stopPropagation();delN('+n.id+');openNC()" style="background:none;border:none;color:var(--fg-m);cursor:pointer;font-size:12px;opacity:.3;padding:6px;"><i class="fas fa-times"></i></button></div>'});h+='</div>';openModal(h)}
+    function openNC(){closeDD();var ns=getN();var h='<div style="padding:28px;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;"><div style="display:flex;align-items:center;gap:12px;"><div style="width:4px;height:28px;background:var(--info);border-radius:2px;"></div><h2 style="font-size:20px;font-weight:800;">مركز الإشعارات</h2><span style="background:rgba(56,189,248,.1);color:var(--info);font-size:12px;font-weight:700;padding:2px 10px;border-radius:10px;">'+ns.length+'</span></div><div style="display:flex;gap:8px;"><button class="btn-secondary" style="font-size:12px;padding:6px 14px;" onclick="markAllR();openNC()"><i class="fas fa-check-double" style="margin-left:5px;"></i>قراءة الكل</button><button onclick="clearAllN()" style="background:rgba(255,77,106,.1);color:var(--danger);font-size:12px;font-weight:600;padding:6px 14px;border-radius:10px;border:1px solid rgba(255,77,106,.2);cursor:pointer;font-family:Cairo;"><i class="fas fa-trash" style="margin-left:5px;"></i>مسح الكل</button></div></div>';if(!ns.length)h+='<div class="empty-state"><i class="fas fa-bell-slash"></i><p style="font-weight:600;">لا توجد إشعارات</p></div>';else ns.forEach(function(n){var cfg=NI[n.type]||NI.create;var click=n.ticketId?'onclick="closeModal();setTimeout(function(){openTD(\''+n.ticketId+'\')},200)"':'';h+='<div class="notif-center-item'+(n.read?'':' unread')+'" style="cursor:'+(n.ticketId?'pointer':'default')+';" '+click+'><div class="nc-dot" style="display:none;position:absolute;right:12px;top:50%;transform:translateY(-50%);width:7px;height:7px;border-radius:50%;background:var(--accent);"></div><div class="notif-icon-wrap" style="background:'+cfg.bg+';color:'+cfg.color+';flex-shrink:0;"><i class="fas '+cfg.icon+'"></i></div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;margin-bottom:3px;">'+n.title+'</div><div style="font-size:12px;color:var(--fg-m);margin-bottom:4px;">'+n.body+'</div><div style="font-size:11px;color:var(--fg-m);opacity:.5;">'+n.time+'</div></div><button onclick="event.stopPropagation();delN('+n.id+');openNC()" style="background:none;border:none;color:var(--fg-m);cursor:pointer;font-size:12px;opacity:.3;padding:6px;"><i class="fas fa-times"></i></button></div>'});h+='</div>';openModal(h)}
     function clearAllN(){saveN([]);updateNU();openNC()}
 
     function renderPD(){var u=state.user;if(!u)return;var c=avColor(u);var urc=unreadC();var h='<div style="padding:20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;"><div class="avatar avatar-md" style="background:'+c+';color:#080d0a;position:relative;">'+initials(u)+'<div class="online-dot"></div></div><div><div style="font-weight:700;font-size:15px;">'+u+'</div><div style="font-size:12px;color:var(--fg-m);">موظف</div></div></div><div style="padding:8px 0;"><div class="profile-menu-item" onclick="openNC();closeDD()"><i class="fas fa-bell"></i>مركز الإشعارات'+(urc?'<span style="margin-right:auto;background:var(--danger);color:white;font-size:10px;padding:1px 7px;border-radius:8px;font-weight:700;">'+urc+'</span>':'')+'</div><div class="profile-menu-item" onclick="openMyStats();closeDD()"><i class="fas fa-chart-simple"></i>إحصائياتي</div><div style="height:1px;background:var(--border);margin:4px 20px;"></div><div class="profile-menu-item danger" onclick="handleLogout()"><i class="fas fa-arrow-right-from-bracket"></i>تسجيل الخروج</div></div>';var dd=document.getElementById('profileDropdown');if(dd)dd.innerHTML=h}
-    function openMyStats(){var u=state.user;if(!u)return;var tk=getT().filter(function(t){return t.employeeName===u});var c=avColor(u);var h='<div style="padding:28px;"><div style="text-align:center;margin-bottom:24px;"><div class="avatar avatar-lg" style="background:'+c+';color:#080d0a;margin:0 auto 14px;box-shadow:0 0 0 3px var(--modal-bg),0 0 0 5px '+c+';">'+initials(u)+'</div><div style="font-size:18px;font-weight:800;">'+u+'</div><div style="font-size:12px;color:var(--fg-m);margin-top:4px;">موظف</div></div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">'+sMB('إجمالي',tk.length,'var(--fg)','fa-ticket-alt')+sMB('معلق',tk.filter(function(t){return t.status==='معلق'}).length,'var(--warn)','fa-clock')+sMB('قيد التنفيذ',tk.filter(function(t){return t.status==='قيد التنفيذ'}).length,'var(--info)','fa-spinner')+sMB('تم الحل',tk.filter(function(t){return t.status==='تم الحل'||t.status==='مغلق'}).length,'var(--accent)','fa-check-circle')+sMB('ملغي',tk.filter(function(t){return t.status==='ملغي'}).length,'var(--danger)','fa-ban')+'</div></div>';openModal(h)}
+    function openMyStats(){var u=state.user;if(!u)return;var tk=myTicketsCache;var c=avColor(u);var h='<div style="padding:28px;"><div style="text-align:center;margin-bottom:24px;"><div class="avatar avatar-lg" style="background:'+c+';color:#080d0a;margin:0 auto 14px;box-shadow:0 0 0 3px var(--modal-bg),0 0 0 5px '+c+';">'+initials(u)+'</div><div style="font-size:18px;font-weight:800;">'+u+'</div><div style="font-size:12px;color:var(--fg-m);margin-top:4px;">موظف</div></div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">'+sMB('إجمالي',tk.length,'var(--fg)','fa-ticket-alt')+sMB('معلق',tk.filter(function(t){return t.status==='معلق'}).length,'var(--warn)','fa-clock')+sMB('قيد التنفيذ',tk.filter(function(t){return t.status==='قيد التنفيذ'}).length,'var(--info)','fa-spinner')+sMB('تم الحل',tk.filter(function(t){return t.status==='تم الحل'||t.status==='مغلق'}).length,'var(--accent)','fa-check-circle')+sMB('ملغي',tk.filter(function(t){return t.status==='ملغي'}).length,'var(--danger)','fa-ban')+'</div></div>';openModal(h)}
     function sMB(l,v,c,ic){return'<div style="background:var(--input-bg);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;"><i class="fas '+ic+'" style="font-size:20px;color:'+c+';margin-bottom:8px;display:block;"></i><div style="font-size:28px;font-weight:900;color:'+c+';">'+v+'</div><div style="font-size:11px;color:var(--fg-m);margin-top:4px;">'+l+'</div></div>'}
 
     /* === دخول وخروج === */
@@ -375,48 +419,7 @@
     document.getElementById('loginName').addEventListener('keydown',function(e){if(e.key==='Enter')handleLogin()});
     document.getElementById('loginName').addEventListener('input',function(){document.getElementById('loginNameError').style.display='none'});
 
-    /* === إدارة التذاكر === */
-    function getT(){try{var d=JSON.parse(localStorage.getItem('ugec_tickets'));return d&&d.length?d:[]}catch(e){return[]}}
-    function saveT(t){localStorage.setItem('ugec_tickets',JSON.stringify(t))}
-    function genID(){var t=getT();var m=1000;t.forEach(function(x){var n=parseInt(x.id.split('-')[1]);if(n>m)m=n});return'TKT-'+(m+1)}
-    function getNow(){var d=new Date(),p=function(n){return String(n).padStart(2,'0')};return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes())}
-
-    /* === واجهات المستخدم === */
-    function showToast(m,t){var c=document.getElementById('toastContainer');var el=document.createElement('div');el.className='toast toast-'+t;el.innerHTML='<i class="fas '+(t==='success'?'fa-check-circle':'fa-exclamation-circle')+'"></i>'+m;c.appendChild(el);setTimeout(function(){el.classList.add('toast-out');setTimeout(function(){el.remove()},300)},3500)}
-    function openModal(h){document.getElementById('modalContent').innerHTML=h;document.getElementById('modalOverlay').classList.add('active');document.body.style.overflow='hidden'}
-    function closeModal(){document.getElementById('modalOverlay').classList.remove('active');document.body.style.overflow=''}
-    function closeModalOutside(e){if(e.target===document.getElementById('modalOverlay'))closeModal()}
-    function openLightbox(src){document.getElementById('lightboxImg').src=src;document.getElementById('lightbox').classList.add('active')}
-    function closeLightbox(){document.getElementById('lightbox').classList.remove('active')}
-
-    /* === رفع الملفات === */
-    function handleFiles(fl){Array.from(fl).forEach(function(f){if(f.size>10*1024*1024){showToast('الملف '+f.name+' أكبر من 10MB','error');return}var fd={name:f.name,size:fSz(f.size),type:f.type,thumb:null};if(f.type.startsWith('image/')){var r=new FileReader();r.onload=function(e){fd.thumb=e.target.result;renderFP()};r.readAsDataURL(f)}tempFiles.push(fd)});renderFP()}
-    function fSz(b){if(b<1024)return b+' B';if(b<1048576)return(b/1024).toFixed(0)+' KB';return(b/1048576).toFixed(1)+' MB'}
-    function renderFP(){document.getElementById('filePreviewList').innerHTML=tempFiles.map(function(f,i){return'<div class="file-preview-item">'+(f.thumb?'<img src="'+f.thumb+'" style="width:40px;height:40px;border-radius:8px;object-fit:cover;border:1px solid var(--border);">':'<div class="file-icon-thumb"><i class="fas '+fIc(f.name)+'"></i></div>')+'<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+f.name+'</div><div style="font-size:11px;color:var(--fg-m);">'+f.size+'</div></div><button class="file-remove" onclick="removeF('+i+')" type="button"><i class="fas fa-times"></i></button></div>'}).join('')}
-    function removeF(i){tempFiles.splice(i,1);renderFP()}
-    function fIc(n){var e=n.split('.').pop().toLowerCase();return{pdf:'fa-file-pdf',doc:'fa-file-word',docx:'fa-file-word',xls:'fa-file-excel',xlsx:'fa-file-excel',txt:'fa-file-lines'}[e]||'fa-file'}
-    var uz=document.getElementById('uploadZone');
-    uz.addEventListener('dragover',function(e){e.preventDefault();uz.classList.add('drag-over')});
-    uz.addEventListener('dragleave',function(){uz.classList.remove('drag-over')});
-    uz.addEventListener('drop',function(e){e.preventDefault();uz.classList.remove('drag-over');if(e.dataTransfer.files.length)handleFiles(e.dataTransfer.files)});
-
-    /* === تبديل حقل العتاد === */
-    function toggleHardwareField() {
-        var type = document.getElementById('problemType').value;
-        var hwDiv = document.getElementById('hardwareFieldContainer');
-        var hwSelect = document.getElementById('hardwareItem');
-
-        if (type === 'Hardware') {
-            hwDiv.style.display = 'block';
-            hwSelect.setAttribute('required', 'true');
-        } else {
-            hwDiv.style.display = 'none';
-            hwSelect.removeAttribute('required');
-            hwSelect.value = "";
-        }
-    }
-
-    /* === إرسال التيكت === */
+    /* === إرسال التيكت (معدل لـ Firebase) === */
     function handleTicketSubmit(e){e.preventDefault();
         var s=document.getElementById('ticketSubject').value.trim();
         var dp=document.getElementById('ticketDept').value;
@@ -427,9 +430,13 @@
         
         if(!s||!dp||!pr||!d||!pType){showToast('يرجى ملء جميع الحقول المطلوبة','error');return false}
         
-        var tk=getT();
+        if(!db) {showToast('لم يتم الاتصال بقاعدة البيانات','error'); return false;}
+
+        // توليد ID
+        var ntId = 'TKT-' + (Date.now().toString().slice(-4));
+
         var nt={
-            id:genID(),
+            id:ntId,
             subject:s,
             description:d,
             department:dp,
@@ -443,22 +450,29 @@
             problemType:pType,
             hardwareItem:pType==='Hardware'?pItem:null
         };
-        tk.unshift(nt);saveT(tk);
-        document.getElementById('ticketForm').reset();
-        toggleHardwareField(); // إعادة ضبط واجهة العتاد
-        tempFiles=[];renderFP();
-        showToast('تم إرسال التيكت بنجاح - '+nt.id,'success');
-        addN('create','تيكت جديد: '+s,'تم إنشاء #'+nt.id+' بقسم '+dp,nt.id);
-        renderMT();
+
+        // إرسال لـ Firebase
+        db.ref('tickets/' + ntId).set(nt).then(() => {
+            // نجاح
+            document.getElementById('ticketForm').reset();
+            toggleHardwareField(); 
+            tempFiles=[];renderFP();
+            showToast('تم إرسال التيكت بنجاح - '+ntId,'success');
+            addN('create','تيكت جديد: '+s,'تم إنشاء #'+ntId+' بقسم '+dp,ntId);
+        }).catch((error) => {
+            console.error(error);
+            showToast('حدث خطأ أثناء الإرسال','error');
+        });
+
         return false
     }
 
-    /* === عرض التذاكر === */
+    /* === عرض التذاكر (معدل لـ Firebase) === */
     function sB(s){var m={'معلق':'badge-pending','قيد التنفيذ':'badge-progress','تم الحل':'badge-resolved','مغلق':'badge-closed','ملغي':'badge-cancelled'};return'<span class="badge '+(m[s]||'')+'">'+s+'</span>'}
     function pB(p){var m={'عاجلة':'badge-urgent','عالية':'badge-high','متوسطة':'badge-medium','منخفضة':'badge-low'};return'<span class="badge '+(m[p]||'')+'">'+p+'</span>'}
 
     function tCH(t){var dc={'Electrical':'#ffb020','Civil':'#38bdf8','HR':'#c084fc','Financial':'#00e88f','IT Support':'#ff6b6b'};var c=dc[t.department]||'#00e88f';var ac=avColor(t.employeeName);var isCancel=t.status==='ملغي';
-    
+
     // إضافة شارة لنوع المشكلة
     var typeBadge = '';
     if(t.problemType) {
@@ -472,14 +486,36 @@
 
     return'<div class="glass ticket-card'+(isCancel?' cancelled-card':'')+'" style="padding:20px;margin-bottom:12px;cursor:pointer;'+(isCancel?'opacity:.65;':'')+'" onclick="openTD(\''+t.id+'\')"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;"><div style="display:flex;gap:14px;flex:1;min-width:200px;"><div class="avatar avatar-sm" style="background:'+ac+';color:#080d0a;margin-top:2px;">'+initials(t.employeeName)+'</div><div style="flex:1;min-width:0;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;"><span style="font-size:12px;color:var(--fg-m);font-weight:600;">'+t.id+'</span>'+typeBadge+'<span style="width:5px;height:5px;border-radius:50%;background:'+c+';display:inline-block;"></span><span style="font-size:11px;color:'+c+';font-weight:600;">'+t.department+'</span></div><div style="font-size:15px;font-weight:700;margin-bottom:6px;">'+t.subject+'</div><div style="font-size:12px;color:var(--fg-m);display:flex;align-items:center;gap:12px;flex-wrap:wrap;"><span>'+t.employeeName+'</span><span><i class="fas fa-clock" style="margin-left:4px;"></i>'+t.createdAt+'</span>'+(t.files.length?'<span><i class="fas fa-paperclip" style="margin-left:4px;"></i>'+t.files.length+'</span>':'')+'</div></div></div><div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">'+pB(t.priority)+sB(t.status)+'</div></div></div>'}
 
-    function renderMT(){if(!state.user)return;var tk=getT().filter(function(t){return t.employeeName===state.user});var f=myTicketFilter==='all'?tk:tk.filter(function(t){return t.status===myTicketFilter});document.getElementById('myTicketCount').textContent=tk.length;var el=document.getElementById('myTicketsList');if(!f.length)el.innerHTML='<div class="empty-state"><i class="fas fa-inbox"></i><p style="font-size:15px;font-weight:600;">لا توجد تيكتات'+(myTicketFilter!=='all'?' بهذه الحالة':' بعد')+'</p></div>';else el.innerHTML=f.map(tCH).join('')}
+    function renderMT(){
+        // فلترة الذاكرة المؤقتة حسب الحالة
+        var f=myTicketFilter==='all'?myTicketsCache:myTicketsCache.filter(function(t){return t.status===myTicketFilter});
+        document.getElementById('myTicketCount').textContent=myTicketsCache.length;
+        var el=document.getElementById('myTicketsList');
+        if(!f.length)el.innerHTML='<div class="empty-state"><i class="fas fa-inbox"></i><p style="font-size:15px;font-weight:600;">لا توجد تيكتات'+(myTicketFilter!=='all'?' بهذه الحالة':' بعد')+'</p></div>';else el.innerHTML=f.map(tCH).join('');
+    }
     function filterMyTickets(f,btn){myTicketFilter=f;document.querySelectorAll('#empFilterPills .filter-pill').forEach(function(p){p.classList.remove('active')});btn.classList.add('active');renderMT()}
 
     /* === إلغاء التيكت === */
-    function cancelTicket(id){var tk=getT();var t=tk.find(function(x){return x.id===id});if(!t||t.status!=='معلق')return;t.status='ملغي';t.timeline.push({action:'تم إلغاء التيكت بواسطة الموظف',time:getNow(),type:'cancel'});saveT(tk);addN('cancel','إلغاء تيكت: '+t.subject,'تم إلغاء #'+t.id,id);showToast('تم إلغاء التيكت','success');closeModal();renderMT()}
+    function cancelTicket(id){
+        if(!db) return;
+        // جلب التيكت من الـ Cache المحدث
+        var t=myTicketsCache.find(function(x){return x.id===id});
+        if(!t||t.status!=='معلق')return;
+        
+        t.status='ملغي';
+        t.timeline.push({action:'تم إلغاء التيكت بواسطة الموظف',time:getNow(),type:'cancel'});
+        
+        // تحديث في Firebase
+        db.ref('tickets/'+id).update(t).then(() => {
+            addN('cancel','إلغاء تيكت: '+t.subject,'تم إلغاء #'+t.id,id);
+            showToast('تم إلغاء التيكت','success');
+            closeModal();
+            renderMT();
+        });
+    }
 
     /* === تفاصيل التيكت (المودال) === */
-    function openTD(id){var tk=getT();var t=tk.find(function(x){return x.id===id});if(!t)return;var dc={'Electrical':'#ffb020','Civil':'#38bdf8','HR':'#c084fc','Financial':'#00e88f','IT Support':'#ff6b6b'};var deptC=dc[t.department]||'#00e88f';var ac=avColor(t.employeeName);var isCancel=t.status==='ملغي';
+    function openTD(id){var t=myTicketsCache.find(function(x){return x.id===id});if(!t)return;var dc={'Electrical':'#ffb020','Civil':'#38bdf8','HR':'#c084fc','Financial':'#00e88f','IT Support':'#ff6b6b'};var deptC=dc[t.department]||'#00e88f';var ac=avColor(t.employeeName);var isCancel=t.status==='ملغي';
 
     /* تفاصيل نوع المشكلة */
     var problemInfo = '';
@@ -490,7 +526,7 @@
         var pH = '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(56,189,248,0.05);border:1px solid rgba(56,189,248,0.1);border-radius:8px;margin-bottom:12px;"><i class="fas '+pIcon+'" style="color:'+pColor+'"></i><div><span style="font-size:12px;color:var(--fg-m);">نوع المشكلة:</span> <span style="font-weight:700;color:'+pColor+'">'+pTitle+'</span></div></div>';
         
         if(t.problemType === 'Hardware' && t.hardwareItem) {
-            pH += '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(255,176,32,0.05);border:1px solid rgba(255,176,32,0.1);border-radius:8px;margin-bottom:12px;"><i class="fas fa-laptop-medical" style="color:var(--warn)"></i><div><span style="font-size:12px;color:var(--fg-m);">الجهاز المعطل:</span> <span style="font-weight:700;color:var(--warn)">'+t.hardwareItem+'</span></div></div>';
+            pH += '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(255,176,32,0.05);border:1px solid rgba(255,176,32,0.1);border-radius:8px;margin-bottom:12px;"><i class="fas fa-laptop-medical" style="color:var(--warn)"></i><div><span style="font-size:12px;color:var(--fg-m);">الجهاز المعطل:</span> <span style="font-weight:700;color:var(--warn)'+t.hardwareItem+'</span></div></div>';
         }
         problemInfo = pH;
     }
@@ -506,13 +542,79 @@
 
     /* زر الإلغاء */
     var cancelH='';if(t.status==='معلق'){cancelH='<div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);"><div id="cancelArea_'+t.id+'"><button class="btn-danger" onclick="document.getElementById(\'cancelConfirm_'+t.id+'\').style.display=\'block\'"><i class="fas fa-ban" style="margin-left:6px;"></i>إلغاء التيكت</button><div class="cancel-confirm" id="cancelConfirm_'+t.id+'"><p style="font-size:13px;color:var(--danger);font-weight:600;margin-bottom:10px;"><i class="fas fa-exclamation-triangle" style="margin-left:6px;"></i>هل أنت متأكد من إلغاء التيكت؟ لا يمكن التراجع عن هذا الإجراء.</p><div style="display:flex;gap:8px;"><button class="btn-danger" onclick="cancelTicket(\''+t.id+'\')"><i class="fas fa-check" style="margin-left:4px;"></i>نعم، إلغاء</button><button class="btn-secondary" onclick="document.getElementById(\'cancelConfirm_'+t.id+'\').style.display=\'none\'">تراجع</button></div></div></div></div>'}
+    if(isCancel){cancelH='<div style="margin-top:20px;padding:16px;background:rgba(255,77,106,.08);border:1px solid rgba(255,77,106,.2);border-radius:12px;text-align:center;"><i class="fas fa-ban" style="font-size:24px;color:var(--danger);margin-bottom:8px;display:block;"></i><p style="font-size:14px;font-weight:700;color:var(--danger);">هذا التيكت تم إلغاؤه بواسطة الموظف</p></div>'}
 
     openModal('<div style="padding:28px;'+(isCancel?'opacity:.75;':'')+'"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;"><div style="display:flex;align-items:center;gap:12px;"><div style="width:4px;height:28px;background:'+(isCancel?'var(--danger)':deptC)+';border-radius:2px;"></div><div><div style="font-size:18px;font-weight:800;">'+t.subject+'</div><div style="font-size:12px;color:var(--fg-m);">'+t.id+' - '+t.createdAt+'</div></div></div><button onclick="closeModal()" style="background:rgba(255,77,106,.1);border:none;color:var(--danger);width:36px;height:36px;border-radius:10px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-times"></i></button></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;"><span style="font-size:11px;font-weight:600;padding:4px 12px;border-radius:8px;background:'+deptC+'22;color:'+deptC+';border:1px solid '+deptC+'33;">'+t.department+'</span>'+pB(t.priority)+sB(t.status)+'</div><div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;padding:12px 16px;background:var(--input-bg);border-radius:12px;"><div class="avatar avatar-md" style="background:'+ac+';color:#080d0a;">'+initials(t.employeeName)+'</div><div><div style="font-size:14px;font-weight:700;">'+t.employeeName+'</div><div style="font-size:11px;color:var(--fg-m);">موظف</div></div></div>'+problemInfo+'<div style="padding:16px;background:var(--input-bg);border:1px solid var(--border);border-radius:12px;"><div style="font-size:12px;font-weight:600;color:var(--fg-m);margin-bottom:8px;">وصف المشكلة</div><p style="font-size:14px;line-height:1.8;">'+t.description+'</p></div>'+fH+rH+tH+cancelH+'</div>')}
 
-    /* === التهيئة === */
-    function initApp(){if(!state.user)return;applyTheme(getTheme());var av=document.getElementById('headerAvatar');if(av)renderAv(av,state.user,'avatar-sm');var nm=document.getElementById('headerName');if(nm)nm.textContent=state.user;updateNU();renderMT()}
-    window.addEventListener('load',function(){applyTheme(getTheme());var su=localStorage.getItem('ugec_emp_user');if(su){state.user=su;document.getElementById('loginScreen').style.display='none';document.getElementById('mainApp').style.display='block';requestAnimationFrame(function(){requestAnimationFrame(function(){initApp()})})}else{document.getElementById('loginName').focus()}});
+    /* === التهيئة والاستماع للبيانات === */
+    function initApp(){
+        if(!state.user)return;
+        applyTheme(getTheme());
+        var av=document.getElementById('headerAvatar');if(av)renderAv(av,state.user,'avatar-sm');
+        var nm=document.getElementById('headerName');if(nm)nm.textContent=state.user;
+        updateNU();
+
+        // الاستماع للتيكتات الخاصة بهذا الموظف فقط من Firebase
+        if(db) {
+            db.ref('tickets').orderByChild('employeeName').equalTo(state.user).on('value', snap => {
+                myTicketsCache = [];
+                snap.forEach(c => myTicketsCache.push(c.val()));
+                // ترتيب تنازلي
+                myTicketsCache.sort((a,b) => b.id.localeCompare(a.id));
+                renderMT();
+            });
+        } else {
+             renderMT(); // سيعرض فارغ في حالة خطأ الاتصال
+        }
+    }
+
+    /* === Helpers === */
+    function getNow(){var d=new Date(),p=function(n){return String(n).padStart(2,'0')};return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes())}
+    function showToast(m,t){var c=document.getElementById('toastContainer');var el=document.createElement('div');el.className='toast toast-'+t;el.innerHTML='<i class="fas '+(t==='success'?'fa-check-circle':'fa-exclamation-circle')+'"></i>'+m;c.appendChild(el);setTimeout(function(){el.classList.add('toast-out');setTimeout(function(){el.remove()},300)},3500)}
+    function openModal(h){document.getElementById('modalContent').innerHTML=h;document.getElementById('modalOverlay').classList.add('active');document.body.style.overflow='hidden'}
+    function closeModal(){document.getElementById('modalOverlay').classList.remove('active');document.body.style.overflow=''}
+    function closeModalOutside(e){if(e.target===document.getElementById('modalOverlay'))closeModal()}
+    function openLightbox(src){document.getElementById('lightboxImg').src=src;document.getElementById('lightbox').classList.add('active')}
+    function closeLightbox(){document.getElementById('lightbox').classList.remove('active')}
+
+    function toggleHardwareField() {
+        var type = document.getElementById('problemType').value;
+        var hwDiv = document.getElementById('hardwareFieldContainer');
+        var hwSelect = document.getElementById('hardwareItem');
+
+        if (type === 'Hardware') {
+            hwDiv.style.display = 'block';
+            hwSelect.setAttribute('required', 'true');
+        } else {
+            hwDiv.style.display = 'none';
+            hwSelect.removeAttribute('required');
+            hwSelect.value = "";
+        }
+    }
+
+    function handleFiles(fl){Array.from(fl).forEach(function(f){if(f.size>10*1024*1024){showToast('الملف '+f.name+' أكبر من 10MB','error');return}var fd={name:f.name,size:fSz(f.size),type:f.type,thumb:null};if(f.type.startsWith('image/')){var r=new FileReader();r.onload=function(e){fd.thumb=e.target.result;renderFP()};r.readAsDataURL(f)}tempFiles.push(fd)});renderFP()}
+    function fSz(b){if(b<1024)return b+' B';if(b<1048576)return(b/1024).toFixed(0)+' KB';return(b/1048576).toFixed(1)+' MB'}
+    function renderFP(){document.getElementById('filePreviewList').innerHTML=tempFiles.map(function(f,i){return'<div class="file-preview-item">'+(f.thumb?'<img src="'+f.thumb+'" style="width:40px;height:40px;border-radius:8px;object-fit:cover;border:1px solid var(--border);">':'<div class="file-icon-thumb"><i class="fas '+fIc(f.name)+'"></i></div>')+'<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+f.name+'</div><div style="font-size:11px;color:var(--fg-m);">'+f.size+'</div></div><button class="file-remove" onclick="removeF('+i+')" type="button"><i class="fas fa-times"></i></button></div>'}).join('')}
+    function removeF(i){tempFiles.splice(i,1);renderFP()}
+    function fIc(n){var e=n.split('.').pop().toLowerCase();return{pdf:'fa-file-pdf',doc:'fa-file-word',docx:'fa-file-word',xls:'fa-file-excel',xlsx:'fa-file-excel',txt:'fa-file-lines'}[e]||'fa-file'}
+    var uz=document.getElementById('uploadZone');
+    uz.addEventListener('dragover',function(e){e.preventDefault();uz.classList.add('drag-over')});
+    uz.addEventListener('dragleave',function(){uz.classList.remove('drag-over')});
+    uz.addEventListener('drop',function(e){e.preventDefault();uz.classList.remove('drag-over');if(e.dataTransfer.files.length)handleFiles(e.dataTransfer.files)});
+
+    window.addEventListener('load',function(){
+        applyTheme(getTheme()); 
+        var su=localStorage.getItem('ugec_emp_user');
+        if(su){
+            state.user=su; 
+            document.getElementById('loginScreen').style.display='none'; 
+            document.getElementById('mainApp').style.display='block'; 
+            requestAnimationFrame(function(){requestAnimationFrame(function(){initApp()})})
+        }else{
+            document.getElementById('loginName').focus()
+        }
+    });
     document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeModal();closeLightbox();closeDD()}});
     </script>
 </body>
-</html>
+</html> 

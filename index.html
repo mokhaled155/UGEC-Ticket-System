@@ -20,114 +20,51 @@
         /* الألوان والمتغيرات الأساسية */
         :root{--bg:#080d0a;--bg-card:rgba(14,22,17,0.85);--bg-card-h:rgba(18,28,22,0.95);--fg:#e4ece6;--fg-m:#7a9484;--accent:#00e88f;--accent-d:rgba(0,232,143,0.12);--accent-g:rgba(0,232,143,0.3);--danger:#ff4d6a;--warn:#ffb020;--info:#38bdf8;--border:rgba(0,232,143,0.08);--border-h:rgba(0,232,143,0.2);--input-bg:rgba(0,0,0,0.3);--overlay:rgba(0,0,0,0.7);--modal-bg:#0f1713;--shadow:rgba(0,0,0,0.5);--orb-o:.35}
         html.light{--bg:#f2f6f4;--bg-card:rgba(255,255,255,0.92);--bg-card-h:rgba(255,255,255,1);--fg:#1a2e23;--fg-m:#5a7a68;--accent:#00a86b;--accent-d:rgba(0,168,107,0.1);--accent-g:rgba(0,168,107,0.2);--danger:#e03e56;--warn:#d49500;--info:#0ea5e9;--border:rgba(0,168,107,0.1);--border-h:rgba(0,168,107,0.25);--input-bg:rgba(0,0,0,0.04);--overlay:rgba(0,0,0,0.35);--modal-bg:#ffffff;--shadow:rgba(0,40,20,0.1);--orb-o:.15}
-        
         *{margin:0;padding:0;box-sizing:border-box}
         body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;overflow-x:hidden;transition:background .4s,color .4s}
-        
-        /* تصميم الشريط المتحرك */
         ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--accent-d);border-radius:3px}
-        
-        /* الخلفية المتحركة */
         .bg-orbs{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:var(--orb-o);animation:orbF 20s ease-in-out infinite;transition:opacity .4s}.orb-1{width:500px;height:500px;background:radial-gradient(circle,rgba(0,232,143,.2),transparent 70%);top:-10%;right:-5%}.orb-2{width:400px;height:400px;background:radial-gradient(circle,rgba(0,180,110,.15),transparent 70%);bottom:-15%;left:-5%;animation-delay:-7s}.orb-3{width:300px;height:300px;background:radial-gradient(circle,rgba(0,232,143,.08),transparent 70%);top:40%;left:50%;animation-delay:-14s}
         @keyframes orbF{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(30px,-40px) scale(1.1)}50%{transform:translate(-20px,20px) scale(.95)}75%{transform:translate(40px,30px) scale(1.05)}}
-        
-        /* تأثير الضجيج */
         .noise{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.03;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-repeat:repeat;background-size:256px}
-        
-        /* الكروت الزجاجية */
         .glass{background:var(--bg-card);backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:16px;transition:all .3s,background .4s,border-color .4s}.glass:hover{border-color:var(--border-h);background:var(--bg-card-h)}
-        
-        /* حقول الإدخال */
         .input-field{background:var(--input-bg);border:1px solid var(--border);border-radius:12px;padding:12px 16px;color:var(--fg);font-family:'Cairo',sans-serif;font-size:14px;transition:all .3s,background .4s,border-color .4s;width:100%;outline:none}.input-field:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-d)}.input-field::placeholder{color:var(--fg-m);opacity:.5}
-        
-        /* القوائم المنسدلة */
         select.input-field{appearance:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%237a9484' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:left 14px center}
         html.light select.input-field{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%235a7a68' d='M6 8L1 3h10z'/%3E%3C/svg%3E")}
         select.input-field option{background:var(--modal-bg);color:var(--fg)}
-        
-        /* العناوين */
         .field-label{display:block;font-size:13px;font-weight:600;color:var(--fg-m);margin-bottom:8px}
-        
-        /* الأزرار */
         .btn-primary{background:linear-gradient(135deg,#00e88f,#00b36e);color:#080d0a;font-weight:700;padding:12px 28px;border-radius:12px;border:none;cursor:pointer;font-family:'Cairo',sans-serif;font-size:15px;transition:all .3s;position:relative;overflow:hidden}
         html.light .btn-primary{background:linear-gradient(135deg,#00c97a,#009e5c)}
         .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,232,143,.3)}.btn-primary:active{transform:translateY(0)}
-        
         .btn-secondary{background:var(--accent-d);color:var(--accent);font-weight:600;padding:8px 20px;border-radius:10px;border:1px solid var(--border);cursor:pointer;font-family:'Cairo',sans-serif;font-size:13px;transition:all .3s,background .4s,color .4s}.btn-secondary:hover{background:var(--accent-g);border-color:var(--accent)}
-        
         .btn-danger{background:rgba(255,77,106,.1);color:var(--danger);font-weight:600;padding:8px 20px;border-radius:10px;border:1px solid rgba(255,77,106,.2);cursor:pointer;font-family:'Cairo',sans-serif;font-size:13px;transition:all .3s}.btn-danger:hover{background:rgba(255,77,106,.25);border-color:var(--danger)}
-        
-        /* منطقة الرفع */
         .upload-zone{border:2px dashed var(--border);border-radius:16px;padding:40px 20px;text-align:center;transition:all .3s,background .4s,border-color .4s;cursor:pointer}.upload-zone:hover,.upload-zone.drag-over{border-color:var(--accent);background:var(--accent-d)}
-        
         .file-preview-item{display:flex;align-items:center;gap:12px;background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:10px 14px;animation:slideUp .3s}
         .file-icon-thumb{width:40px;height:40px;border-radius:8px;background:var(--accent-d);display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:16px;flex-shrink:0}
         .file-remove{margin-right:auto;width:28px;height:28px;border-radius:50%;background:rgba(255,77,106,.1);border:none;color:var(--danger);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .2s}.file-remove:hover{background:rgba(255,77,106,.3)}
-        
-        /* الشارات */
         .badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600}
-        .badge-pending{background:rgba(255,176,32,.1);color:var(--warn);border:1px solid rgba(255,176,32,.2)}
-        .badge-progress{background:rgba(56,189,248,.1);color:var(--info);border:1px solid rgba(56,189,248,.2)}
-        .badge-resolved{background:rgba(0,232,143,.1);color:var(--accent);border:1px solid rgba(0,232,143,.2)}
-        .badge-closed{background:rgba(122,148,132,.1);color:var(--fg-m);border:1px solid rgba(122,148,132,.2)}
-        .badge-cancelled{background:rgba(255,77,106,.1);color:var(--danger);border:1px solid rgba(255,77,106,.2)}
-        .badge-urgent{background:rgba(255,77,106,.1);color:var(--danger);border:1px solid rgba(255,77,106,.2)}
-        .badge-high{background:rgba(255,140,50,.1);color:#ff8c32;border:1px solid rgba(255,140,50,.2)}
-        .badge-medium{background:rgba(255,176,32,.1);color:var(--warn);border:1px solid rgba(255,176,32,.2)}
-        .badge-low{background:rgba(0,232,143,.1);color:var(--accent);border:1px solid rgba(0,232,143,.2)}
-        
-        /* الإشعارات */
+        .badge-pending{background:rgba(255,176,32,.1);color:var(--warn);border:1px solid rgba(255,176,32,.2)}.badge-progress{background:rgba(56,189,248,.1);color:var(--info);border:1px solid rgba(56,189,248,.2)}.badge-resolved{background:rgba(0,232,143,.1);color:var(--accent);border:1px solid rgba(0,232,143,.2)}.badge-closed{background:rgba(122,148,132,.1);color:var(--fg-m);border:1px solid rgba(122,148,132,.2)}.badge-cancelled{background:rgba(255,77,106,.1);color:var(--danger);border:1px solid rgba(255,77,106,.2)}.badge-urgent{background:rgba(255,77,106,.1);color:var(--danger);border:1px solid rgba(255,77,106,.2)}.badge-high{background:rgba(255,140,50,.1);color:#ff8c32;border:1px solid rgba(255,140,50,.2)}.badge-medium{background:rgba(255,176,32,.1);color:var(--warn);border:1px solid rgba(255,176,32,.2)}.badge-low{background:rgba(0,232,143,.1);color:var(--accent);border:1px solid rgba(0,232,143,.2)}
         .toast-container{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:10000;display:flex;flex-direction:column;gap:10px}
         .toast{padding:14px 24px;border-radius:12px;font-size:14px;font-weight:600;backdrop-filter:blur(20px);animation:toastIn .4s ease;display:flex;align-items:center;gap:10px;min-width:300px}
-        .toast-success{background:rgba(0,232,143,.15);border:1px solid rgba(0,232,143,.3);color:var(--accent)}
-        .toast-error{background:rgba(255,77,106,.15);border:1px solid rgba(255,77,106,.3);color:var(--danger)}
-        
-        /* المودال والنوافذ */
+        .toast-success{background:rgba(0,232,143,.15);border:1px solid rgba(0,232,143,.3);color:var(--accent)}.toast-error{background:rgba(255,77,106,.15);border:1px solid rgba(255,77,106,.3);color:var(--danger)}
         .modal-overlay{position:fixed;inset:0;background:var(--overlay);backdrop-filter:blur(8px);z-index:5000;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .3s,background .4s}
         .modal-overlay.active{opacity:1;pointer-events:all}
         .modal-content{background:var(--modal-bg);border:1px solid var(--border);border-radius:20px;max-width:720px;width:100%;max-height:85vh;overflow-y:auto;transform:scale(.9) translateY(20px);transition:transform .3s,background .4s,border-color .4s}
         .modal-overlay.active .modal-content{transform:scale(1) translateY(0)}
-        
         .lightbox-overlay{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:9000;display:flex;align-items:center;justify-content:center;padding:40px;opacity:0;pointer-events:none;transition:opacity .3s;cursor:zoom-out}.lightbox-overlay.active{opacity:1;pointer-events:all}.lightbox-overlay img{max-width:90%;max-height:85vh;border-radius:12px;object-fit:contain}
         .lightbox-close{position:absolute;top:20px;left:20px;width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:white;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}.lightbox-close:hover{background:rgba(255,77,106,.3);border-color:var(--danger)}
-        
-        /* فلتر التذاكر */
         .filter-pill{padding:6px 16px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--fg-m);font-family:'Cairo',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s,background .4s,color .4s}.filter-pill:hover{border-color:var(--border-h);color:var(--fg)}.filter-pill.active{background:var(--accent-d);border-color:var(--accent);color:var(--accent)}
-        
-        /* كارت التذكرة */
-        .ticket-card{position:relative;overflow:hidden;transition:transform .2s}.ticket-card::before{content:'';position:absolute;top:0;right:0;width:3px;height:0;background:var(--accent);border-radius:0 0 3px 0;transition:height .3s}.ticket-card:hover::before{height:100%}.ticket-card:hover{transform:translateX(-3px)}
-        .ticket-card.cancelled-card::before{background:var(--danger)}
-        
-        /* الخط الزمني */
-        .timeline-item{position:relative;padding-right:30px;padding-bottom:20px}.timeline-item::before{content:'';position:absolute;right:8px;top:24px;bottom:0;width:1px;background:var(--border)}.timeline-item:last-child::before{display:none}
-        .timeline-dot{position:absolute;right:0;top:6px;width:18px;height:18px;border-radius:50%;border:2px solid var(--accent);background:var(--bg);transition:background .4s}
-        
-        /* حالة فارغة */
+        .ticket-card{position:relative;overflow:hidden;transition:transform .2s}.ticket-card::before{content:'';position:absolute;top:0;right:0;width:3px;height:0;background:var(--accent);border-radius:0 0 3px 0;transition:height .3s}.ticket-card:hover::before{height:100%}.ticket-card:hover{transform:translateX(-3px)}.ticket-card.cancelled-card::before{background:var(--danger)}
+        .timeline-item{position:relative;padding-right:30px;padding-bottom:20px}.timeline-item::before{content:'';position:absolute;right:8px;top:24px;bottom:0;width:1px;background:var(--border)}.timeline-item:last-child::before{display:none}.timeline-dot{position:absolute;right:0;top:6px;width:18px;height:18px;border-radius:50%;border:2px solid var(--accent);background:var(--bg);transition:background .4s}
         .empty-state{text-align:center;padding:60px 20px;color:var(--fg-m)}.empty-state i{font-size:48px;margin-bottom:16px;opacity:.3;display:block}
-        
-        /* الأفاتار */
-        .avatar{border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;color:#080d0a;flex-shrink:0;position:relative;letter-spacing:-1px}
-        .avatar-sm{width:36px;height:36px;font-size:13px;border-radius:10px}.avatar-md{width:44px;height:44px;font-size:16px}.avatar-lg{width:72px;height:72px;font-size:26px;border-radius:18px}
+        .avatar{border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;color:#080d0a;flex-shrink:0;position:relative;letter-spacing:-1px}.avatar-sm{width:36px;height:36px;font-size:13px;border-radius:10px}.avatar-md{width:44px;height:44px;font-size:16px}.avatar-lg{width:72px;height:72px;font-size:26px;border-radius:18px}
         .online-dot{position:absolute;bottom:-2px;left:-2px;width:12px;height:12px;border-radius:50%;background:var(--accent);border:2px solid var(--bg);z-index:2;transition:border-color .4s}
-        
-        /* القوائم المنسدلة (Notifications & Profile) */
-        .notif-bell{position:relative;cursor:pointer;width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;transition:all .2s;border:1px solid transparent}.notif-bell:hover{background:var(--input-bg);border-color:var(--border)}.notif-bell i{font-size:16px;color:var(--fg-m);transition:color .2s}.notif-bell:hover i{color:var(--fg)}
-        .notif-count{position:absolute;top:2px;left:2px;min-width:18px;height:18px;border-radius:9px;background:var(--danger);color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px}.notif-count.hidden{display:none}
-        
+        .notif-bell{position:relative;cursor:pointer;width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;transition:all .2s;border:1px solid transparent}.notif-bell:hover{background:var(--input-bg);border-color:var(--border)}.notif-bell i{font-size:16px;color:var(--fg-m);transition:color .2s}.notif-bell:hover i{color:var(--fg)}.notif-count{position:absolute;top:2px;left:2px;min-width:18px;height:18px;border-radius:9px;background:var(--danger);color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px}.notif-count.hidden{display:none}
         .notif-panel{position:absolute;top:calc(100% + 8px);left:0;width:380px;background:var(--modal-bg);border:1px solid var(--border);border-radius:16px;box-shadow:0 20px 60px var(--shadow);z-index:200;opacity:0;transform:translateY(-8px) scale(.97);pointer-events:none;transition:all .25s cubic-bezier(.4,0,.2,1),background .4s,border-color .4s;overflow:hidden}.notif-panel.open{opacity:1;transform:translateY(0) scale(1);pointer-events:all}
-        .notif-panel-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-        .notif-item{display:flex;gap:12px;padding:14px 20px;transition:background .2s;cursor:pointer;border-bottom:1px solid rgba(0,232,143,.04);position:relative}.notif-item:hover{background:var(--input-bg)}.notif-item.unread{background:var(--accent-d)}.notif-item.unread::after{content:'';position:absolute;right:10px;top:50%;transform:translateY(-50%);width:6px;height:6px;border-radius:50%;background:var(--accent)}
-        
+        .notif-panel-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}.notif-item{display:flex;gap:12px;padding:14px 20px;transition:background .2s;cursor:pointer;border-bottom:1px solid rgba(0,232,143,.04);position:relative}.notif-item:hover{background:var(--input-bg)}.notif-item.unread{background:var(--accent-d)}.notif-item.unread::after{content:'';position:absolute;right:10px;top:50%;transform:translateY(-50%);width:6px;height:6px;border-radius:50%;background:var(--accent)}
         .profile-dropdown{position:absolute;top:calc(100% + 8px);left:0;width:280px;background:var(--modal-bg);border:1px solid var(--border);border-radius:16px;box-shadow:0 20px 60px var(--shadow);z-index:200;opacity:0;transform:translateY(-8px) scale(.97);pointer-events:none;transition:all .25s cubic-bezier(.4,0,.2,1),background .4s,border-color .4s;overflow:hidden}.profile-dropdown.open{opacity:1;transform:translateY(0) scale(1);pointer-events:all}
         .profile-menu-item{display:flex;align-items:center;gap:12px;padding:12px 20px;cursor:pointer;transition:background .2s;font-size:13px;font-weight:500;color:var(--fg-m)}.profile-menu-item:hover{background:var(--input-bg);color:var(--fg)}.profile-menu-item i{width:18px;text-align:center}.profile-menu-item.danger{color:var(--danger)}.profile-menu-item.danger:hover{background:rgba(255,77,106,.08)}
-        
-        /* شاشة الدخول */
         .login-screen{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--bg);transition:background .4s}.login-screen.fade-out{animation:fadeOut .5s ease forwards}
-        
-        /* تبديل الثيم */
         .theme-toggle{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:1px solid transparent;transition:all .2s;background:none;color:var(--fg-m);font-size:16px}.theme-toggle:hover{background:var(--input-bg);border-color:var(--border);color:var(--fg)}.theme-toggle i{transition:transform .4s}.theme-toggle:hover i{transform:rotate(30deg)}
-        
-        /* تأثيرات */
         @keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
         @keyframes fadeOut{from{opacity:1}to{opacity:0;pointer-events:none}}
         @keyframes toastIn{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
@@ -136,39 +73,27 @@
         .logo-pulse{animation:logoPulse 3s ease-in-out infinite}
         @keyframes logoPulse{0%,100%{filter:drop-shadow(0 0 8px rgba(0,232,143,.2))}50%{filter:drop-shadow(0 0 16px rgba(0,232,143,.4))}}
         .animate-card-enter{animation:cardEnter .5s ease forwards;opacity:0}
-        
         .cancel-confirm{display:none;padding:12px 16px;background:rgba(255,77,106,.08);border:1px solid rgba(255,77,106,.2);border-radius:12px;margin-top:12px;animation:slideUp .3s}
-        
-        /* تجاوب */
         @media(max-width:768px){.form-grid{grid-template-columns:1fr!important}.notif-panel,.profile-dropdown{left:auto;right:50%;transform:translateX(50%) translateY(-8px) scale(.97)}.notif-panel.open,.profile-dropdown.open{transform:translateX(50%) translateY(0) scale(1)}.hide-mobile{display:none!important}.notif-panel{width:calc(100vw - 40px)}}
         @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
     </style>
 </head>
 <body>
-    <!-- عناصر الخلفية -->
     <div class="bg-orbs"><div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div></div>
     <div class="noise"></div>
-    
-    <!-- حاوية التنبيهات -->
     <div class="toast-container" id="toastContainer"></div>
-    
-    <!-- المودال الرئيسي -->
     <div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
         <div class="modal-content" id="modalContent"></div>
     </div>
-    
-    <!-- معرض الصور -->
     <div class="lightbox-overlay" id="lightbox" onclick="closeLightbox()">
         <button class="lightbox-close" onclick="closeLightbox()"><i class="fas fa-times"></i></button>
         <img id="lightboxImg" src="" alt="معاينة">
     </div>
 
-    <!-- شاشة تسجيل الدخول -->
     <div class="login-screen" id="loginScreen">
         <div style="max-width:420px;width:100%;position:relative;z-index:1;">
             <div class="glass" style="padding:40px 32px;">
                 <div style="text-align:center;margin-bottom:32px;">
-                    <!-- استخدام شعار افتراضي أو صورة محلية -->
                     <img src="https://z-cdn-media.chatglm.cn/files/af8b5b93-40d3-4018-9454-9ee14140c506.jpeg?auth_key=1874947110-0d1b478544024bc98d24c7457913086f-0-a84469da1208755b035f340381092847" alt="UGEC Logo" class="logo-pulse" style="height:72px;width:auto;border-radius:10px;object-fit:contain;margin:0 auto 16px;display:block;">
                     <h1 style="font-size:26px;font-weight:900;">Ugec Ticket</h1>
                     <p style="font-size:13px;color:var(--fg-m);margin-top:4px;">بوابة الموظف</p>
@@ -186,9 +111,7 @@
         </div>
     </div>
 
-    <!-- التطبيق الرئيسي -->
     <div id="mainApp" style="display:none;position:relative;z-index:2;">
-        <!-- الهيدر -->
         <header class="glass" style="margin:16px;border-radius:16px;position:sticky;top:16px;z-index:100;">
             <div style="max-width:1200px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
                 <div style="display:flex;align-items:center;gap:10px;">
@@ -198,8 +121,6 @@
                 </div>
                 <div style="display:flex;align-items:center;gap:6px;">
                     <button class="theme-toggle" onclick="toggleTheme()" title="تبديل الوضع"><i class="fas fa-moon" id="themeIcon"></i></button>
-                    
-                    <!-- الإشعارات -->
                     <div style="position:relative;" id="notifWrap">
                         <div class="notif-bell" onclick="toggleNotifPanel(event)">
                             <i class="fas fa-bell" id="bellIcon"></i>
@@ -207,8 +128,6 @@
                         </div>
                         <div class="notif-panel" id="notifPanel"></div>
                     </div>
-                    
-                    <!-- البروفايل -->
                     <div style="position:relative;" id="profileWrap">
                         <div style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:4px 8px;border-radius:12px;transition:background .2s;" onclick="toggleProfileDropdown(event)" onmouseover="this.style.background='var(--input-bg)'" onmouseout="this.style.background='transparent'">
                             <div id="headerAvatar" class="avatar avatar-sm"></div>
@@ -223,10 +142,7 @@
             </div>
         </header>
 
-        <!-- المحتوى الرئيسي -->
         <main style="max-width:1200px;margin:0 auto;padding:0 16px 40px;">
-            
-            <!-- قسم إنشاء تيكت -->
             <section class="glass animate-card-enter" style="padding:32px;margin-bottom:24px;animation-delay:.1s;">
                 <div style="display:flex;align-items:center;gap:12px;margin-bottom:28px;">
                     <div style="width:4px;height:28px;background:var(--accent);border-radius:2px;"></div>
@@ -239,7 +155,6 @@
                             <input type="text" class="input-field" id="ticketSubject" placeholder="اكتب موضوع المشكلة باختصار..." required>
                         </div>
                         
-                        <!-- حقل نوع المشكلة الجديد -->
                         <div>
                             <label class="field-label">نوع المشكلة</label>
                             <select class="input-field" id="problemType" onchange="toggleHardwareField()" required>
@@ -249,7 +164,6 @@
                             </select>
                         </div>
 
-                        <!-- حقل القسم المختص -->
                         <div>
                             <label class="field-label">القسم المختص</label>
                             <select class="input-field" id="ticketDept" required>
@@ -262,7 +176,6 @@
                             </select>
                         </div>
 
-                        <!-- حقل تفاصيل العتاد (يظهر فقط إذا اختار Hardware) -->
                         <div id="hardwareFieldContainer" style="display:none; grid-column:span 2;">
                             <label class="field-label">جهاز معطل (Hardware)</label>
                             <select class="input-field" id="hardwareItem">
@@ -274,7 +187,6 @@
                             </select>
                         </div>
 
-                        <!-- الأولوية -->
                         <div>
                             <label class="field-label">الأولوية</label>
                             <select class="input-field" id="ticketPriority" required>
@@ -309,7 +221,6 @@
                 </form>
             </section>
             
-            <!-- قسم تيكتاتي -->
             <section class="glass animate-card-enter" style="padding:32px;animation-delay:.3s;">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
                     <div style="display:flex;align-items:center;gap:12px;">
@@ -332,25 +243,23 @@
 
     <script>
     /* =========================================
-       FIREBASE CONFIGURATION (إعداداتك)
+       FIREBASE CONFIGURATION
        ========================================= */
-  const firebaseConfig = {
-  apiKey: "AIzaSyAlKEOvbVXdvRypso5rtwz8Fd2vjSAkxRs",
-  authDomain: "ugecticketsystem.firebaseapp.com",
-  databaseURL: "https://ugecticketsystem-default-rtdb.firebaseio.com", // (هذا السطر كان مفقوداً عندك، وهو ضروري جداً)
-  projectId: "ugecticketsystem",
-  storageBucket: "ugecticketsystem.firebasestorage.app",
-  messagingSenderId: "8172737962",
-  appId: "1:8172737962:web:aea493fa37f1c27f7587d3",
-  measurementId: "G-RZEM7YTQ0M"
-};
+    const firebaseConfig = {
+        apiKey: "AIzaSyAlKEOvbVXdvRypso5rtwz8Fd2vjSAkxRs",
+        authDomain: "ugecticketsystem.firebaseapp.com",
+        databaseURL: "https://ugecticketsystem-default-rtdb.firebaseio.com",
+        projectId: "ugecticketsystem",
+        storageBucket: "ugecticketsystem.firebasestorage.app",
+        messagingSenderId: "8172737962",
+        appId: "1:8172737962:web:aea493fa37f1c27f7587d3",
+        measurementId: "G-RZEM7YTQ0M"
+    };
 
-    // تهيئة Firebase
     let db;
     try {
         if (!firebaseConfig.databaseURL) {
-            console.error("Please configure firebaseConfig in the code!");
-            alert("خطأ: لم يتم إعداد إعدادات Firebase في الكود.");
+            alert("خطأ: تأكد من وجود databaseURL في إعدادات Firebase.");
         } else {
             firebase.initializeApp(firebaseConfig);
             db = firebase.database();
@@ -358,13 +267,14 @@
         }
     } catch (e) {
         console.error("Firebase Init Error:", e);
+        alert("خطأ في تهيئة Firebase: " + e.message);
     }
 
     /* =========================================
        APP STATE
        ========================================= */
     var state={user:null};var tempFiles=[];var myTicketFilter='all';var notifPanelOpen=false,profileOpen=false;
-    var myTicketsCache = []; // تخزين مؤقت للتيكتات
+    var myTicketsCache = []; 
 
     /* === الثيم === */
     function getTheme(){return localStorage.getItem('ugec_theme')||'dark'}
@@ -382,14 +292,6 @@
     function renderAv(el,name,cls){var c=avColor(name);el.className='avatar '+(cls||'avatar-sm');el.style.background=c;el.textContent=initials(name)}
 
     /* === إدارة الإشعارات === */
-    // الاستماع للإشعارات الخاصة بهذا المستخدم فقط
-    if(db && state.user) {
-        db.ref('notifications').orderByChild('ticketId').startAt('TKT-').endAt('TKT-\uf8ff').on('value', snap => {
-             // منطق بسيط لتحديث العداد (يمكن تحسينه بفلترة دقيقة في السيرفر)
-             // للتبسيط سنستخدم العداد من LocalStorage كما كان أو سنعتمد على السماعات
-        });
-    }
-
     function getN(){try{return JSON.parse(localStorage.getItem('ugec_notifs')||'[]')}catch(e){return[]}}
     function saveN(n){localStorage.setItem('ugec_notifs',JSON.stringify(n))}
     function addN(type,title,body,tid){var ns=getN();ns.unshift({id:Date.now(),type:type,title:title,body:body,ticketId:tid||null,time:getNow(),read:false});if(ns.length>50)ns.length=50;saveN(ns);updateNU();playNotifSound();var b=document.getElementById('bellIcon');if(b){b.classList.remove('bell-ring');void b.offsetWidth;b.classList.add('bell-ring')}}
@@ -406,7 +308,7 @@
     function closeDD(){notifPanelOpen=false;profileOpen=false;var p=document.getElementById('notifPanel'),d=document.getElementById('profileDropdown');if(p)p.classList.remove('open');if(d)d.classList.remove('open')}
     document.addEventListener('click',function(e){var nw=document.getElementById('notifWrap'),pw=document.getElementById('profileWrap');if(nw&&!nw.contains(e.target)){notifPanelOpen=false;var p=document.getElementById('notifPanel');if(p)p.classList.remove('open')}if(pw&&!pw.contains(e.target)){profileOpen=false;var d=document.getElementById('profileDropdown');if(d)d.classList.remove('open')}});
 
-    function openNC(){closeDD();var ns=getN();var h='<div style="padding:28px;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;"><div style="display:flex;align-items:center;gap:12px;"><div style="width:4px;height:28px;background:var(--info);border-radius:2px;"></div><h2 style="font-size:20px;font-weight:800;">مركز الإشعارات</h2><span style="background:rgba(56,189,248,.1);color:var(--info);font-size:12px;font-weight:700;padding:2px 10px;border-radius:10px;">'+ns.length+'</span></div><div style="display:flex;gap:8px;"><button class="btn-secondary" style="font-size:12px;padding:6px 14px;" onclick="markAllR();openNC()"><i class="fas fa-check-double" style="margin-left:5px;"></i>قراءة الكل</button><button onclick="clearAllN()" style="background:rgba(255,77,106,.1);color:var(--danger);font-size:12px;font-weight:600;padding:6px 14px;border-radius:10px;border:1px solid rgba(255,77,106,.2);cursor:pointer;font-family:Cairo;"><i class="fas fa-trash" style="margin-left:5px;"></i>مسح الكل</button></div></div>';if(!ns.length)h+='<div class="empty-state"><i class="fas fa-bell-slash"></i><p style="font-weight:600;">لا توجد إشعارات</p></div>';else ns.forEach(function(n){var cfg=NI[n.type]||NI.create;var click=n.ticketId?'onclick="closeModal();setTimeout(function(){openTD(\''+n.ticketId+'\')},200)"':'';h+='<div class="notif-center-item'+(n.read?'':' unread')+'" style="cursor:'+(n.ticketId?'pointer':'default')+';" '+click+'><div class="nc-dot" style="display:none;position:absolute;right:12px;top:50%;transform:translateY(-50%);width:7px;height:7px;border-radius:50%;background:var(--accent);"></div><div class="notif-icon-wrap" style="background:'+cfg.bg+';color:'+cfg.color+';flex-shrink:0;"><i class="fas '+cfg.icon+'"></i></div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;margin-bottom:3px;">'+n.title+'</div><div style="font-size:12px;color:var(--fg-m);margin-bottom:4px;">'+n.body+'</div><div style="font-size:11px;color:var(--fg-m);opacity:.5;">'+n.time+'</div></div><button onclick="event.stopPropagation();delN('+n.id+');openNC()" style="background:none;border:none;color:var(--fg-m);cursor:pointer;font-size:12px;opacity:.3;padding:6px;"><i class="fas fa-times"></i></button></div>'});h+='</div>';openModal(h)}
+    function openNC(){closeDD();var ns=getN();var h='<div style="padding:28px;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;"><div style="display:flex;align-items:center;gap:12px;"><div style="width:4px;height:28px;background:var(--info);border-radius:2px;"></div><h2 style="font-size:20px;font-weight:800;">مركز الإشعارات</h2><span style="background:rgba(56,189,248,.1);color:var(--info);font-size:12px;font-weight:700;padding:2px 10px;border-radius:10px;">'+ns.length+'</span></div><div style="display:flex;gap:8px;"><button class="btn-secondary" style="font-size:12px;padding:6px 14px;" onclick="markAllR();openNC()"><i class="fas fa-check-double" style="margin-left:5px;"></i>قراءة الكل</button><button onclick="clearAllN()" style="background:rgba(255,77,106,.1);color:var(--danger);font-size:12px;font-weight:600;padding:6px 14px;border-radius:10px;border:1px solid rgba(255,77,106,.2);cursor:pointer;font-family:Cairo;"><i class="fas fa-trash" style="margin-left:5px;"></i>مسح الكل</button></div></div>';if(!ns.length)h+='<div class="empty-state"><i class="fas fa-bell-slash"></i><p style="font-weight:600;">لا توجد إشعارات</p></div>';else ns.forEach(function(n){var cfg=NI[n.type]||NI.create;var click=n.ticketId?'onclick="closeModal();setTimeout(function(){openTD(\''+n.ticketId+'\')},200)"':'';h+='<div class="notif-center-item'+(n.read?'':' unread')+'" style="cursor:'+(n.ticketId?'pointer':'default')+';padding:16px 24px;border-bottom:1px solid rgba(0,232,143,.04);display:flex;gap:14px;position:relative;transition:background .2s;" '+click+'><div class="nc-dot" style="display:none;position:absolute;right:12px;top:50%;transform:translateY(-50%);width:7px;height:7px;border-radius:50%;background:var(--accent);"></div><div class="notif-icon-wrap" style="background:'+cfg.bg+';color:'+cfg.color+';flex-shrink:0;width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;"><i class="fas '+cfg.icon+'"></i></div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;margin-bottom:3px;">'+n.title+'</div><div style="font-size:12px;color:var(--fg-m);margin-bottom:4px;">'+n.body+'</div><div style="font-size:11px;color:var(--fg-m);opacity:.5;">'+n.time+'</div></div><button onclick="event.stopPropagation();delN('+n.id+');openNC()" style="background:none;border:none;color:var(--fg-m);cursor:pointer;font-size:12px;opacity:.3;padding:6px;"><i class="fas fa-times"></i></button></div>'});h+='</div>';openModal(h)}
     function clearAllN(){saveN([]);updateNU();openNC()}
 
     function renderPD(){var u=state.user;if(!u)return;var c=avColor(u);var urc=unreadC();var h='<div style="padding:20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;"><div class="avatar avatar-md" style="background:'+c+';color:#080d0a;position:relative;">'+initials(u)+'<div class="online-dot"></div></div><div><div style="font-weight:700;font-size:15px;">'+u+'</div><div style="font-size:12px;color:var(--fg-m);">موظف</div></div></div><div style="padding:8px 0;"><div class="profile-menu-item" onclick="openNC();closeDD()"><i class="fas fa-bell"></i>مركز الإشعارات'+(urc?'<span style="margin-right:auto;background:var(--danger);color:white;font-size:10px;padding:1px 7px;border-radius:8px;font-weight:700;">'+urc+'</span>':'')+'</div><div class="profile-menu-item" onclick="openMyStats();closeDD()"><i class="fas fa-chart-simple"></i>إحصائياتي</div><div style="height:1px;background:var(--border);margin:4px 20px;"></div><div class="profile-menu-item danger" onclick="handleLogout()"><i class="fas fa-arrow-right-from-bracket"></i>تسجيل الخروج</div></div>';var dd=document.getElementById('profileDropdown');if(dd)dd.innerHTML=h}
@@ -419,7 +321,7 @@
     document.getElementById('loginName').addEventListener('keydown',function(e){if(e.key==='Enter')handleLogin()});
     document.getElementById('loginName').addEventListener('input',function(){document.getElementById('loginNameError').style.display='none'});
 
-    /* === إرسال التيكت (معدل لـ Firebase) === */
+    /* === إرسال التيكت === */
     function handleTicketSubmit(e){e.preventDefault();
         var s=document.getElementById('ticketSubject').value.trim();
         var dp=document.getElementById('ticketDept').value;
@@ -451,29 +353,28 @@
             hardwareItem:pType==='Hardware'?pItem:null
         };
 
-        // إرسال لـ Firebase
+        // إرسال لـ Firebase مع معالجة الأخطاء
         db.ref('tickets/' + ntId).set(nt).then(() => {
-            // نجاح
             document.getElementById('ticketForm').reset();
             toggleHardwareField(); 
             tempFiles=[];renderFP();
             showToast('تم إرسال التيكت بنجاح - '+ntId,'success');
             addN('create','تيكت جديد: '+s,'تم إنشاء #'+ntId+' بقسم '+dp,ntId);
         }).catch((error) => {
-            console.error(error);
-            showToast('حدث خطأ أثناء الإرسال','error');
+            console.error("Firebase Error:", error);
+            // عرض رسالة الخطأ الحقيقية لتشخيص المشكلة
+            showToast('خطأ في الإرسال: ' + error.message,'error');
+            alert("حدث خطأ أثناء الاتصال بقاعدة البيانات.\nتأكد من أن قواعد الأمان (Rules) تسمح بالقراءة والكتابة.\n\nالتفاصيل: " + error.message);
         });
 
         return false
     }
 
-    /* === عرض التذاكر (معدل لـ Firebase) === */
+    /* === عرض التذاكر === */
     function sB(s){var m={'معلق':'badge-pending','قيد التنفيذ':'badge-progress','تم الحل':'badge-resolved','مغلق':'badge-closed','ملغي':'badge-cancelled'};return'<span class="badge '+(m[s]||'')+'">'+s+'</span>'}
     function pB(p){var m={'عاجلة':'badge-urgent','عالية':'badge-high','متوسطة':'badge-medium','منخفضة':'badge-low'};return'<span class="badge '+(m[p]||'')+'">'+p+'</span>'}
 
     function tCH(t){var dc={'Electrical':'#ffb020','Civil':'#38bdf8','HR':'#c084fc','Financial':'#00e88f','IT Support':'#ff6b6b'};var c=dc[t.department]||'#00e88f';var ac=avColor(t.employeeName);var isCancel=t.status==='ملغي';
-
-    // إضافة شارة لنوع المشكلة
     var typeBadge = '';
     if(t.problemType) {
         var typeColor = t.problemType === 'Hardware' ? '#ffb020' : '#38bdf8';
@@ -483,11 +384,9 @@
         }
         typeBadge = '<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;background:'+typeColor+'22;color:'+typeColor+';border:1px solid '+typeColor+'33;margin-right:6px;">'+typeText+'</span>';
     }
-
     return'<div class="glass ticket-card'+(isCancel?' cancelled-card':'')+'" style="padding:20px;margin-bottom:12px;cursor:pointer;'+(isCancel?'opacity:.65;':'')+'" onclick="openTD(\''+t.id+'\')"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;"><div style="display:flex;gap:14px;flex:1;min-width:200px;"><div class="avatar avatar-sm" style="background:'+ac+';color:#080d0a;margin-top:2px;">'+initials(t.employeeName)+'</div><div style="flex:1;min-width:0;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;"><span style="font-size:12px;color:var(--fg-m);font-weight:600;">'+t.id+'</span>'+typeBadge+'<span style="width:5px;height:5px;border-radius:50%;background:'+c+';display:inline-block;"></span><span style="font-size:11px;color:'+c+';font-weight:600;">'+t.department+'</span></div><div style="font-size:15px;font-weight:700;margin-bottom:6px;">'+t.subject+'</div><div style="font-size:12px;color:var(--fg-m);display:flex;align-items:center;gap:12px;flex-wrap:wrap;"><span>'+t.employeeName+'</span><span><i class="fas fa-clock" style="margin-left:4px;"></i>'+t.createdAt+'</span>'+(t.files.length?'<span><i class="fas fa-paperclip" style="margin-left:4px;"></i>'+t.files.length+'</span>':'')+'</div></div></div><div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">'+pB(t.priority)+sB(t.status)+'</div></div></div>'}
 
     function renderMT(){
-        // فلترة الذاكرة المؤقتة حسب الحالة
         var f=myTicketFilter==='all'?myTicketsCache:myTicketsCache.filter(function(t){return t.status===myTicketFilter});
         document.getElementById('myTicketCount').textContent=myTicketsCache.length;
         var el=document.getElementById('myTicketsList');
@@ -498,52 +397,40 @@
     /* === إلغاء التيكت === */
     function cancelTicket(id){
         if(!db) return;
-        // جلب التيكت من الـ Cache المحدث
         var t=myTicketsCache.find(function(x){return x.id===id});
         if(!t||t.status!=='معلق')return;
         
         t.status='ملغي';
         t.timeline.push({action:'تم إلغاء التيكت بواسطة الموظف',time:getNow(),type:'cancel'});
         
-        // تحديث في Firebase
         db.ref('tickets/'+id).update(t).then(() => {
             addN('cancel','إلغاء تيكت: '+t.subject,'تم إلغاء #'+t.id,id);
             showToast('تم إلغاء التيكت','success');
             closeModal();
             renderMT();
+        }).catch((error) => {
+             showToast('فشل الإلغاء: ' + error.message,'error');
         });
     }
 
-    /* === تفاصيل التيكت (المودال) === */
+    /* === تفاصيل التيكت === */
     function openTD(id){var t=myTicketsCache.find(function(x){return x.id===id});if(!t)return;var dc={'Electrical':'#ffb020','Civil':'#38bdf8','HR':'#c084fc','Financial':'#00e88f','IT Support':'#ff6b6b'};var deptC=dc[t.department]||'#00e88f';var ac=avColor(t.employeeName);var isCancel=t.status==='ملغي';
-
-    /* تفاصيل نوع المشكلة */
     var problemInfo = '';
     if(t.problemType) {
         var pColor = t.problemType === 'Hardware' ? 'var(--warn)' : 'var(--info)';
         var pIcon = t.problemType === 'Hardware' ? 'fa-microchip' : 'fa-code';
         var pTitle = t.problemType === 'Hardware' ? 'Hardware (عتاد)' : 'Software (برمجيات)';
         var pH = '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(56,189,248,0.05);border:1px solid rgba(56,189,248,0.1);border-radius:8px;margin-bottom:12px;"><i class="fas '+pIcon+'" style="color:'+pColor+'"></i><div><span style="font-size:12px;color:var(--fg-m);">نوع المشكلة:</span> <span style="font-weight:700;color:'+pColor+'">'+pTitle+'</span></div></div>';
-        
         if(t.problemType === 'Hardware' && t.hardwareItem) {
             pH += '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(255,176,32,0.05);border:1px solid rgba(255,176,32,0.1);border-radius:8px;margin-bottom:12px;"><i class="fas fa-laptop-medical" style="color:var(--warn)"></i><div><span style="font-size:12px;color:var(--fg-m);">الجهاز المعطل:</span> <span style="font-weight:700;color:var(--warn)'+t.hardwareItem+'</span></div></div>';
         }
         problemInfo = pH;
     }
-
-    /* المرفقات */
     var fH='';if(t.files&&t.files.length){var imgs=t.files.filter(function(f){return f.thumb});var others=t.files.filter(function(f){return!f.thumb});fH='<div style="margin-top:20px;"><div style="font-size:13px;font-weight:600;color:var(--fg-m);margin-bottom:12px;">المرفقات ('+t.files.length+')</div>';if(imgs.length){fH+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:'+(others.length?'16px':'0')+'">';imgs.forEach(function(f){fH+='<div style="position:relative;"><img src="'+f.thumb+'" class="img-thumb" onclick="openLightbox(this.src)" title="اضغط للتكبير" style="width:100%;height:100px;border-radius:10px;object-fit:cover;border:1px solid var(--border);cursor:pointer;transition:all .3s;"><div style="position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,.7);color:white;font-size:10px;padding:2px 8px;border-radius:6px;backdrop-filter:blur(4px);">'+f.name+'</div></div>'});fH+='</div>'}if(others.length){fH+='<div style="display:flex;flex-wrap:wrap;gap:8px;">'+others.map(function(f){return'<div style="background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;min-width:180px;"><i class="fas '+fIc(f.name)+'" style="color:var(--fg-m);font-size:18px;"></i><div><div style="font-size:12px;font-weight:600;">'+f.name+'</div><div style="font-size:11px;color:var(--fg-m);">'+f.size+'</div></div></div>'}).join('')+'</div>'}fH+='</div>'}
-
-    /* الردود */
     var rH='';if(t.responses.length){rH='<div style="margin-top:24px;"><div style="font-size:13px;font-weight:600;color:var(--fg-m);margin-bottom:14px;">الردود ('+t.responses.length+')</div>'+t.responses.map(function(r){var rC=avColor(r.from);return'<div style="display:flex;gap:12px;margin-bottom:12px;"><div class="avatar avatar-sm" style="background:'+rC+';color:#080d0a;margin-top:2px;">'+initials(r.from)+'</div><div style="flex:1;background:var(--input-bg);border:1px solid var(--border);border-radius:12px;padding:14px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><span style="font-size:13px;font-weight:700;color:var(--accent);">'+r.from+'</span><span style="font-size:11px;color:var(--fg-m);">'+r.time+'</span></div><p style="font-size:13px;line-height:1.7;">'+r.text+'</p></div></div>'}).join('')+'</div>'}
-
-    /* السجل */
     var tH='<div style="margin-top:24px;"><div style="font-size:13px;font-weight:600;color:var(--fg-m);margin-bottom:14px;">سجل الأحداث</div>'+t.timeline.map(function(i){var dotC=i.type==='create'?'var(--accent)':i.type==='resolve'?'var(--accent)':i.type==='cancel'?'var(--danger)':'var(--info)';return'<div class="timeline-item"><div class="timeline-dot" style="border-color:'+dotC+';"></div><div style="font-size:13px;font-weight:600;">'+i.action+'</div><div style="font-size:11px;color:var(--fg-m);margin-top:2px;">'+i.time+'</div></div>'}).join('')+'</div>';
-
-    /* زر الإلغاء */
     var cancelH='';if(t.status==='معلق'){cancelH='<div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);"><div id="cancelArea_'+t.id+'"><button class="btn-danger" onclick="document.getElementById(\'cancelConfirm_'+t.id+'\').style.display=\'block\'"><i class="fas fa-ban" style="margin-left:6px;"></i>إلغاء التيكت</button><div class="cancel-confirm" id="cancelConfirm_'+t.id+'"><p style="font-size:13px;color:var(--danger);font-weight:600;margin-bottom:10px;"><i class="fas fa-exclamation-triangle" style="margin-left:6px;"></i>هل أنت متأكد من إلغاء التيكت؟ لا يمكن التراجع عن هذا الإجراء.</p><div style="display:flex;gap:8px;"><button class="btn-danger" onclick="cancelTicket(\''+t.id+'\')"><i class="fas fa-check" style="margin-left:4px;"></i>نعم، إلغاء</button><button class="btn-secondary" onclick="document.getElementById(\'cancelConfirm_'+t.id+'\').style.display=\'none\'">تراجع</button></div></div></div></div>'}
     if(isCancel){cancelH='<div style="margin-top:20px;padding:16px;background:rgba(255,77,106,.08);border:1px solid rgba(255,77,106,.2);border-radius:12px;text-align:center;"><i class="fas fa-ban" style="font-size:24px;color:var(--danger);margin-bottom:8px;display:block;"></i><p style="font-size:14px;font-weight:700;color:var(--danger);">هذا التيكت تم إلغاؤه بواسطة الموظف</p></div>'}
-
     openModal('<div style="padding:28px;'+(isCancel?'opacity:.75;':'')+'"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;"><div style="display:flex;align-items:center;gap:12px;"><div style="width:4px;height:28px;background:'+(isCancel?'var(--danger)':deptC)+';border-radius:2px;"></div><div><div style="font-size:18px;font-weight:800;">'+t.subject+'</div><div style="font-size:12px;color:var(--fg-m);">'+t.id+' - '+t.createdAt+'</div></div></div><button onclick="closeModal()" style="background:rgba(255,77,106,.1);border:none;color:var(--danger);width:36px;height:36px;border-radius:10px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-times"></i></button></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;"><span style="font-size:11px;font-weight:600;padding:4px 12px;border-radius:8px;background:'+deptC+'22;color:'+deptC+';border:1px solid '+deptC+'33;">'+t.department+'</span>'+pB(t.priority)+sB(t.status)+'</div><div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;padding:12px 16px;background:var(--input-bg);border-radius:12px;"><div class="avatar avatar-md" style="background:'+ac+';color:#080d0a;">'+initials(t.employeeName)+'</div><div><div style="font-size:14px;font-weight:700;">'+t.employeeName+'</div><div style="font-size:11px;color:var(--fg-m);">موظف</div></div></div>'+problemInfo+'<div style="padding:16px;background:var(--input-bg);border:1px solid var(--border);border-radius:12px;"><div style="font-size:12px;font-weight:600;color:var(--fg-m);margin-bottom:8px;">وصف المشكلة</div><p style="font-size:14px;line-height:1.8;">'+t.description+'</p></div>'+fH+rH+tH+cancelH+'</div>')}
 
     /* === التهيئة والاستماع للبيانات === */
@@ -554,17 +441,22 @@
         var nm=document.getElementById('headerName');if(nm)nm.textContent=state.user;
         updateNU();
 
-        // الاستماع للتيكتات الخاصة بهذا الموظف فقط من Firebase
         if(db) {
-            db.ref('tickets').orderByChild('employeeName').equalTo(state.user).on('value', snap => {
-                myTicketsCache = [];
-                snap.forEach(c => myTicketsCache.push(c.val()));
-                // ترتيب تنازلي
-                myTicketsCache.sort((a,b) => b.id.localeCompare(a.id));
-                renderMT();
-            });
+            // إضافة Callback للأخطاء هنا هو المفتاح لاكتشاف مشاكل الـ Rules
+            db.ref('tickets').orderByChild('employeeName').equalTo(state.user).on('value', 
+                snap => {
+                    myTicketsCache = [];
+                    snap.forEach(c => myTicketsCache.push(c.val()));
+                    myTicketsCache.sort((a,b) => b.id.localeCompare(a.id));
+                    renderMT();
+                },
+                err => {
+                    console.error("Listener Error:", err);
+                    alert("خطأ في استقبال البيانات: " + err.message + "\nتأكد من إعدادات الـ Rules في قاعدة البيانات.");
+                }
+            );
         } else {
-             renderMT(); // سيعرض فارغ في حالة خطأ الاتصال
+             renderMT(); 
         }
     }
 
@@ -617,4 +509,4 @@
     document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeModal();closeLightbox();closeDD()}});
     </script>
 </body>
-</html> 
+</html>

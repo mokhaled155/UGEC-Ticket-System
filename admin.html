@@ -170,12 +170,11 @@
 
 <script>
 /* =========================================
-   FIREBASE CONFIGURATION (تمت إضافة إعداداتك)
+   FIREBASE CONFIGURATION
    ========================================= */
 const firebaseConfig = {
     apiKey: "AIzaSyAlKEOvbVXdvRypso5rtwz8Fd2vjSAkxRs",
     authDomain: "ugecticketsystem.firebaseapp.com",
-    // تم إضافة هذا السطر تلقائياً لأنه ضروري للاتصال بقاعدة البيانات
     databaseURL: "https://ugecticketsystem-default-rtdb.firebaseio.com",
     projectId: "ugecticketsystem",
     storageBucket: "ugecticketsystem.firebasestorage.app",
@@ -187,12 +186,17 @@ const firebaseConfig = {
 // تهيئة Firebase
 let db;
 try {
-    firebase.initializeApp(firebaseConfig);
-    db = firebase.database();
-    console.log("Firebase initialized successfully");
+    if (!firebaseConfig.databaseURL) {
+        console.error("Please configure firebaseConfig in code!");
+        alert("خطأ: لم يتم إعداد إعدادات Firebase في الكود.");
+    } else {
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.database();
+        console.log("Firebase initialized successfully");
+    }
 } catch (e) {
     console.error("Firebase Init Error:", e);
-    alert("خطأ في الاتصال بقاعدة البيانات. تأكد من صحة إعدادات Firebase.");
+    alert("خطأ: لم يتم الاتصال بقاعدة البيانات.");
 }
 
 /* =========================================
@@ -291,12 +295,8 @@ function hLO(){cDD();_destroySession();_resetFL();var app=document.getElementByI
 function addN(type,title,body,tid){
     if(!db) return;
     var n={id:Date.now(),type:type,title:title,body:body,ticketId:tid||null,time:gNow(),read:false};
-    // Push to Firebase
     db.ref('notifications').push(n);
-    
-    // Play sound locally
-    playNS();
-    var b=document.getElementById('bellIcon');if(b){b.classList.remove('bell-ring');void b.offsetWidth;b.classList.add('bellRing')}
+    playNS();var b=document.getElementById('bellIcon');if(b){b.classList.remove('bell-ring');void b.offsetWidth;b.classList.add('bell-ring')}
 }
 
 function addHL(action,ticketId,details,actor,type){
@@ -307,25 +307,29 @@ function addHL(action,ticketId,details,actor,type){
 
 // Listen to Notifications
 var notifsCache = [];
-db.ref('notifications').orderByChild('id').limitToLast(50).on('value', snap => {
-    notifsCache = [];
-    snap.forEach(c => notifsCache.push(c.val()));
-    notifsCache.reverse();
-    updateNU();
-    if(nPO) rNP();
-});
+if(db) {
+    db.ref('notifications').orderByChild('id').limitToLast(50).on('value', snap => {
+        notifsCache = [];
+        snap.forEach(c => notifsCache.push(c.val()));
+        notifsCache.reverse();
+        updateNU();
+        if(nPO) rNP();
+    });
+}
 
 // Listen to History
 var historyCache = [];
-db.ref('history').orderByChild('id').limitToLast(200).on('value', snap => {
-    historyCache = [];
-    snap.forEach(c => historyCache.push(c.val()));
-    historyCache.reverse();
-});
+if(db) {
+    db.ref('history').orderByChild('id').limitToLast(200).on('value', snap => {
+        historyCache = [];
+        snap.forEach(c => historyCache.push(c.val()));
+        historyCache.reverse();
+    });
+}
 
 function uRC(){return notifsCache.filter(function(n){return!n.read}).length}
-function mAR(){notifsCache.forEach(function(n){n.read=true});if(db) db.ref('notifications').set(notifsCache); updateNU()} // Simplified update
-function mNR(id){var n=notifsCache.find(function(x){return x.id===id});if(n)n.read=true; if(db) db.ref('notifications').set(notifsCache); updateNU()} // Simplified update
+function mAR(){notifsCache.forEach(function(n){n.read=true});if(db) db.ref('notifications').set(notifsCache); updateNU()}
+function mNR(id){var n=notifsCache.find(function(x){return x.id===id});if(n)n.read=true; if(db) db.ref('notifications').set(notifsCache); updateNU()}
 function dN(id){notifsCache=notifsCache.filter(function(n){return n.id!==id});if(db) db.ref('notifications').set(notifsCache); updateNU();rNP()}
 function updateNU(){var c=uRC();var el=document.getElementById('notifCount');if(!el)return;if(c>0){el.textContent=c>99?'99+':c;el.classList.remove('hidden')}else{el.classList.add('hidden')}}
 var NI={create:{icon:'fa-plus-circle',bg:'rgba(0,232,143,.1)',color:'#00e88f'},status:{icon:'fa-arrows-rotate',bg:'rgba(56,189,248,.1)',color:'#38bdf8'},response:{icon:'fa-reply',bg:'rgba(171,71,188,.1)',color:'#ab47bc'},resolve:{icon:'fa-check-circle',bg:'rgba(0,232,143,.1)',color:'#00e88f'},cancel:{icon:'fa-ban',bg:'rgba(255,77,106,.1)',color:'#ff4d6a'}};
@@ -377,7 +381,7 @@ function tCH(t){
     var ac=aC(t.employeeName);
     var isC=t.status==='ملغي';
 
-    // إضافة شارة نوع المشكلة
+    // إضافة شارة نوع المشكلة (مطابق للموظف)
     var typeBadge = '';
     if(t.problemType) {
         var typeColor = t.problemType === 'Hardware' ? '#ffb020' : '#38bdf8';
@@ -405,12 +409,12 @@ function oTD(id){var t=ticketsCache.find(function(x){return x.id===id});if(!t)re
         var pH = '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(56,189,248,0.05);border:1px solid rgba(56,189,248,0.1);border-radius:8px;margin-bottom:12px;"><i class="fas '+pIcon+'" style="color:'+pColor+'"></i><div><span style="font-size:12px;color:var(--fg-m);">نوع المشكلة:</span> <span style="font-weight:700;color:'+pColor+'">'+pTitle+'</span></div></div>';
         
         if(t.problemType === 'Hardware' && t.hardwareItem) {
-            pH += '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(255,176,32,0.05);border:1px solid rgba(255,176,32,0.1);border-radius:8px;margin-bottom:12px;"><i class="fas fa-laptop-medical" style="color:var(--warn)"></i><div><span style="font-size:12px;color:var(--fg-m);">الجهاز المعطل:</span> <span style="font-weight:700;color:var(--warn)">'+t.hardwareItem+'</span></div></div>';
+            pH += '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(255,176,32,0.05);border:1px solid rgba(255,176,32,0.1);border-radius:8px;margin-bottom:12px;"><i class="fas fa-laptop-medical" style="color:var(--warn)"></i><div><span style="font-size:12px;color:var(--fg-m);">الجهاز المعطل:</span> <span style="font-weight:700;color:var(--warn)'+t.hardwareItem+'</span></div></div>';
         }
         problemInfo = pH;
     }
 
-    var fH='';if(t.files&&t.files.length){var imgs=t.files.filter(function(f){return f.thumb});var others=t.files.filter(function(f){return!f.thumb});fH='<div style="margin-top:20px;"><div style="font-size:13px;font-weight:600;color:var(--fg-m);margin-bottom:12px;">المرفقات ('+t.files.length+')</div>';if(imgs.length){fH+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:'+(others.length?'16px':'0')+'">';imgs.forEach(function(f){fH+='<div style="position:relative;"><img src="'+f.thumb+'" class="img-thumb" onclick="openLB(this.src)" title="اضغط للتكبير"><div style="position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,.7);color:white;font-size:10px;padding:2px 8px;border-radius:6px;backdrop-filter:blur(4px);">'+f.name+'</div><div style="position:absolute;top:6px;left:6px;background:rgba(56,189,248,.9);color:white;font-size:10px;padding:2px 8px;border-radius:6px;"><i class="fas fa-search-plus" style="margin-left:3px;"></i>تكبير</div></div>'});fH+='</div>'}if(others.length){fH+='<div style="display:flex;flex-wrap:wrap;gap:8px;">'+others.map(function(f){return'<div style="background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;min-width:180px;"><i class="fas '+fI(f.name)+'" style="color:var(--fg-m);font-size:18px;"></i><div><div style="font-size:12px;font-weight:600;">'+f.name+'</div><div style="font-size:11px;color:var(--fg-m);">'+f.size+'</div></div></div>'}).join('')+'</div>'}fH+='</div>'}var rH='';if(t.responses.length){rH='<div style="margin-top:24px;"><div style="font-size:13px;font-weight:600;color:var(--fg-m);margin-bottom:14px;">الردود ('+t.responses.length+')</div>'+t.responses.map(function(r){var rC2=aC(r.from);return'<div style="display:flex;gap:12px;margin-bottom:12px;"><div class="avatar avatar-sm" style="background:'+rC2+';color:#080d0a;margin-top:2px;">'+ini(r.from)+'</div><div style="flex:1;background:var(--input-bg);border:1px solid var(--border);border-radius:12px;padding:14px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><span style="font-size:13px;font-weight:700;color:var(--info);">'+r.from+'</span><span style="font-size:11px;color:var(--fg-m);">'+r.time+'</span></div><p style="font-size:13px;line-height:1.7;">'+r.text+'</p></div></div>'}).join('')+'</div>'}var tH='<div style="margin-top:24px;"><div style="font-size:13px;font-weight:600;color:var(--fg-m);margin-bottom:14px;">سجل الأحداث</div>'+t.timeline.map(function(i){var dc2=i.type==='create'?'var(--info)':i.type==='resolve'?'var(--accent)':i.type==='cancel'?'var(--danger)':'var(--info)';return'<div class="timeline-item"><div class="timeline-dot" style="border-color:'+dc2+';"></div><div style="font-size:13px;font-weight:600;">'+i.action+'</div><div style="font-size:11px;color:var(--fg-m);margin-top:2px;">'+i.time+'</div></div>'}).join('')+'</div>';var admH='';if(t.status!=='ملغي'&&t.status!=='مغلق'){admH='<div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border);"><div style="font-size:13px;font-weight:600;color:var(--fg-m);margin-bottom:12px;">إجراءات الإدارة</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;"><button class="btn-secondary" onclick="chSt(\''+t.id+'\',\'قيد التنفيذ\')"><i class="fas fa-spinner" style="margin-left:6px;"></i>قيد التنفيذ</button><button class="btn-secondary" style="background:rgba(0,232,143,.1);color:var(--accent);" onclick="chSt(\''+t.id+'\',\'تم الحل\')"><i class="fas fa-check" style="margin-left:6px;"></i>تم الحل</button><button class="btn-secondary" style="background:rgba(122,148,132,.1);color:var(--fg-m);" onclick="chSt(\''+t.id+'\',\'مغلق\')"><i class="fas fa-lock" style="margin-left:6px;"></i>إغلاق</button></div><div style="display:flex;gap:8px;align-items:flex-start;"><textarea class="input-field" id="ar_'+t.id+'" rows="3" placeholder="اكتب ردك هنا..." style="flex:1;resize:vertical;"></textarea><button class="btn-primary" style="padding:12px 18px;white-space:nowrap;" onclick="sAR(\''+t.id+'\')"><i class="fas fa-reply"></i></button></div></div>'}if(isC){admH='<div style="margin-top:20px;padding:16px;background:rgba(255,77,106,.08);border:1px solid rgba(255,77,106,.2);border-radius:12px;text-align:center;"><i class="fas fa-ban" style="font-size:24px;color:var(--danger);margin-bottom:8px;display:block;"></i><p style="font-size:14px;font-weight:700;color:var(--danger);">هذا التيكت تم إلغاؤه بواسطة الموظف</p></div>'}oM('<div style="padding:28px;'+(isC?'opacity:.7;':'')+'"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;"><div style="display:flex;align-items:center;gap:12px;"><div style="width:4px;height:28px;background:'+(isC?'var(--danger)':deptC)+';border-radius:2px;"></div><div><div style="font-size:18px;font-weight:800;">'+t.subject+'</div><div style="font-size:12px;color:var(--fg-m);">'+t.id+' - '+t.createdAt+'</div></div></div><button onclick="cM()" style="background:rgba(255,77,106,.1);border:none;color:var(--danger);width:36px;height:36px;border-radius:10px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-times"></i></button></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;"><span style="font-size:11px;font-weight:600;padding:4px 12px;border-radius:8px;background:'+deptC+'22;color:'+deptC+';border:1px solid '+deptC+'33;">'+t.department+'</span>'+pB(t.priority)+sB(t.status)+'</div><div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;padding:12px 16px;background:var(--input-bg);border-radius:12px;"><div class="avatar avatar-md" style="background:'+ac+';color:#080d0a;">'+ini(t.employeeName)+'</div><div><div style="font-size:14px;font-weight:700;">'+t.employeeName+'</div><div style="font-size:11px;color:var(--fg-m);">موظف</div></div></div>'+problemInfo+'<div style="padding:16px;background:var(--input-bg);border:1px solid var(--border);border-radius:12px;"><div style="font-size:12px;font-weight:600;color:var(--fg-m);margin-bottom:8px;">وصف المشكلة</div><p style="font-size:14px;line-height:1.8;">'+t.description+'</p></div>'+fH+rH+tH+admH+'</div>')}
+    var fH='';if(t.files&&t.files.length){var imgs=t.files.filter(function(f){return f.thumb});var others=t.files.filter(function(f){return!f.thumb});fH='<div style="margin-top:20px;"><div style="font-size:13px;font-weight:600;color:var(--fg-m);margin-bottom:12px;">المرفقات ('+t.files.length+')</div>';if(imgs.length){fH+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:'+(others.length?'16px':'0')+'">';imgs.forEach(function(f){fH+='<div style="position:relative;"><img src="'+f.thumb+'" class="img-thumb" onclick="openLB(this.src)" title="اضغط للتكبير"><div style="position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,.7);color:white;font-size:10px;padding:2px 8px;border-radius:6px;backdrop-filter:blur(4px);">'+f.name+'</div><div style="position:absolute;top:6px;left:6px;background:rgba(56,189,248,.9);color:white;font-size:10px;padding:2px 8px;border-radius:6px;"><i class="fas fa-search-plus" style="margin-left:3px;"></i>تكبير</div></div>'});fH+='</div>'}if(others.length){fH+='<div style="display:flex;flex-wrap:wrap;gap:8px;">'+others.map(function(f){return'<div style="background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;min-width:180px;"><i class="fas '+fI(f.name)+'" style="color:var(--fg-m);font-size:18px;"></i><div><div style="font-size:12px;font-weight:600;">'+f.name+'</div><div style="font-size:11px;color:var(--fg-m);">'+f.size+'</div></div></div>'}).join('')+'</div>'}fH+='</div>'}var rH='';if(t.responses.length){rH='<div style="margin-top:24px;"><div style="font-size:13px;font-weight:600;color:var(--fg-m);margin-bottom:14px;">الردود ('+t.responses.length+')</div>'+t.responses.map(function(r){var rC2=aC(r.from);return'<div style="display:flex;gap:12px;margin-bottom:12px;"><div class="avatar avatar-sm" style="background:'+rC2+';color:#080d0a;margin-top:2px;">'+ini(r.from)+'</div><div style="flex:1;background:var(--input-bg);border:1px solid var(--border);border-radius:12px;padding:14px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><span style="font-size:13px;font-weight:700;color:var(--info);">'+r.from+'</span><span style="font-size:11px;color:var(--fg-m);">'+r.time+'</span></div><p style="font-size:13px;line-height:1.7;">'+r.text+'</p></div></div>'}).join('')+'</div>'}var tH='<div style="margin-top:24px;"><div style="font-size:13px;font-weight:600;color:var(--fg-m);margin-bottom:14px;">سجل الأحداث</div>'+t.timeline.map(function(i){var dc2=i.type==='create'?'var(--info)':i.type==='resolve'?'var(--accent)':i.type==='cancel'?'var(--danger)':'var(--info)';return'<div class="timeline-item"><div class="timeline-dot" style="border-color:'+dc2+';"></div><div style="font-size:13px;font-weight:600;">'+i.action+'</div><div style="font-size:11px;color:var(--fg-m);margin-top:2px;">'+i.time+'</div></div>'}).join('')+'</div>';var admH='';if(t.status!=='ملغي'&&t.status!=='مغلق'){admH='<div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border);"><div style="font-size:13px;font-weight:600;color:var(--fg-m);margin-bottom:12px;">إجراءات الإدارة</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;"><button class="btn-secondary" onclick="chSt(\''+t.id+'\',\'قيد التنفيذ\')"><i class="fas fa-spinner" style="margin-left:6px;"></i>قيد التنفيذ</button><button class="btn-secondary" style="background:rgba(0,232,143,.1);color:var(--accent);" onclick="chSt(\''+t.id+'\',\'تم الحل\')"><i class="fas fa-check" style="margin-left:6px;"></i>تم الحل</button><button class="btn-secondary" style="background:rgba(122,148,132,.1);color:var(--fg-m);" onclick="chSt(\''+t.id+'\',\'مغلق\')"><i class="fas fa-lock" style="margin-left:6px;"></i>إغلاق</button></div><div style="display:flex;gap:8px;align-items:flex-start;"><textarea class="input-field" id="ar_'+t.id+'" rows="3" placeholder="اكتب ردك هنا..." style="flex:1;resize:vertical;"></textarea><button class="btn-primary" style="padding:12px 18px;white-space:nowrap;" onclick="sAR(\''+t.id+'\')"><i class="fas fa-reply"></i></button></div></div>'}if(isC){admH='<div style="margin-top:20px;padding:16px;background:rgba(255,77,106,.08);border:1px solid rgba(255,77,106,.2);border-radius:12px;text-align:center;"><i class="fas fa-ban" style="font-size:24px;color:var(--danger);margin-bottom:8px;display:block;"></i><p style="font-size:14px;font-weight:700;color:var(--danger);">هذا التيكت تم إلغاؤه بواسطة الموظف</p></div>'}oM('<div style="padding:28px;'+(isC?'opacity:.75;':'')+'"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;"><div style="display:flex;align-items:center;gap:12px;"><div style="width:4px;height:28px;background:'+(isC?'var(--danger)':deptC)+';border-radius:2px;"></div><div><div style="font-size:18px;font-weight:800;">'+t.subject+'</div><div style="font-size:12px;color:var(--fg-m);">'+t.id+' - '+t.createdAt+'</div></div></div><button onclick="cM()" style="background:rgba(255,77,106,.1);border:none;color:var(--danger);width:36px;height:36px;border-radius:10px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-times"></i></button></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;"><span style="font-size:11px;font-weight:600;padding:4px 12px;border-radius:8px;background:'+deptC+'22;color:'+deptC+';border:1px solid '+deptC+'33;">'+t.department+'</span>'+pB(t.priority)+sB(t.status)+'</div><div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;padding:12px 16px;background:var(--input-bg);border-radius:12px;"><div class="avatar avatar-md" style="background:'+ac+';color:#080d0a;">'+ini(t.employeeName)+'</div><div><div style="font-size:14px;font-weight:700;">'+t.employeeName+'</div><div style="font-size:11px;color:var(--fg-m);">موظف</div></div></div>'+problemInfo+'<div style="padding:16px;background:var(--input-bg);border:1px solid var(--border);border-radius:12px;"><div style="font-size:12px;font-weight:600;color:var(--fg-m);margin-bottom:8px;">وصف المشكلة</div><p style="font-size:14px;line-height:1.8;">'+t.description+'</p></div>'+fH+rH+tH+admH+'</div>')}
 
 function chSt(id,ns){
     if(!db) return;
